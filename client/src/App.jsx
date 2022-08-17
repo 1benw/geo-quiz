@@ -1,12 +1,14 @@
 import { useState } from 'react'
-import { MantineProvider, Text } from '@mantine/core';
+import { Text } from '@mantine/core';
+
+import { StartMenu } from './components';
 
 function App() {
   return (
-    <div>
-      <Text>Hello</Text>
-    </div>
+    <>
+      <StartMenu />
+    </>
   )
 }
 
-export default App
+export default App;
