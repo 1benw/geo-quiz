@@ -1,0 +1,13 @@
+{
+  "name": "geo-quiz-server",
+  "version": "1.0.0",
+  "main": "server.js",
+  "author": "Ben Walker",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon server.js"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.19"
+  }
+}
