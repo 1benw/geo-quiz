@@ -1,6 +1,8 @@
 import { useState } from 'react'
-import { createStyles, Text, Title, Button, Grid, NumberInput } from '@mantine/core';
+import { createStyles, TextInput, Title, Button, Grid } from '@mantine/core';
 import Earth from '../assets/earth.svg';
+
+import { useGameStore } from '../hooks';
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -33,22 +35,42 @@ const useStyles = createStyles((theme) => ({
 export default function () {
   const { classes } = useStyles();
   const [menuState, setMenuState] = useState(false);
-  const [gamePin, setGamePin] = useState(undefined);
+  const [nickname, setNickname] = useState('');
+  const [gamePin, setGamePin] = useState('');
+
+  const connect = useGameStore(state => state.connect);
+
+  const startGame = () => {
+    connect(true, nickname);
+  };
+
+  const joinGame = () => {
+
+  };
 
   return (
     <div className={classes.container}>
       <div className={classes.quiz}>
         <img className={classes.image} src={Earth} />
-        <Title order={1}>GeoQuiz</Title>
+        <Title order={1}>🌏 GeoQuiz 🌎</Title>
       </div>
       {(menuState === 'start' &&
         <div className={classes.actions}>
           <Grid>
+            <Grid.Col span={12}>
+              <TextInput
+                placeholder="Bob"
+                label="Nickname"
+                value={nickname}
+                onChange={e => setNickname(e.currentTarget.value)}
+                maxLength={20}
+              />
+            </Grid.Col>
             <Grid.Col span={6}>
               <Button className={classes.button} fullWidth color="dark" onClick={() => setMenuState(false)}>Go Back</Button>
             </Grid.Col>
             <Grid.Col span={6}>
-              <Button className={classes.button} fullWidth color="green">Start New Game</Button>
+              <Button className={classes.button} fullWidth color="green" onClick={startGame}>Start New Game</Button>
             </Grid.Col>
           </Grid>
         </div>
@@ -56,12 +78,12 @@ export default function () {
         <div className={classes.actions}>
           <Grid>
             <Grid.Col span={12}>
-              <NumberInput
+              <TextInput
                 placeholder="Game Pin"
                 label="Game Pin"
-                hideControls
                 value={gamePin}
-                onChange={v => setGamePin(v)}
+                onChange={e => setGamePin(e.currentTarget.value.toUpperCase())}
+                maxLength={6}
               />
             </Grid.Col>
             <Grid.Col span={6}>
@@ -72,18 +94,18 @@ export default function () {
             </Grid.Col>
           </Grid>
         </div>
-      ) || (!menuState &&
-        <div className={classes.actions}>
-          <Grid>
-            <Grid.Col span={6}>
-              <Button className={classes.button} fullWidth color="green" onClick={() => setMenuState('start')}>Start New Game</Button>
-            </Grid.Col>
-            <Grid.Col span={6}>
-              <Button className={classes.button} fullWidth onClick={() => setMenuState('join')}>Join Game</Button>
-            </Grid.Col>
-          </Grid>
-        </div>
-      )}
+        ) || (!menuState &&
+          <div className={classes.actions}>
+            <Grid>
+              <Grid.Col span={6}>
+                <Button className={classes.button} fullWidth color="green" onClick={() => setMenuState('start')}>Start New Game</Button>
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <Button className={classes.button} fullWidth onClick={() => setMenuState('join')}>Join Game</Button>
+              </Grid.Col>
+            </Grid>
+          </div>
+        )}
     </div>
   )
 }

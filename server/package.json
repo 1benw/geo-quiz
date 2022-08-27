@@ -5,9 +5,13 @@
   "author": "Ben Walker",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon server.js"
+    "dev": "nodemon --experimental-json-modules server.js"
   },
+  "type": "module",
   "devDependencies": {
     "nodemon": "^2.0.19"
+  },
+  "dependencies": {
+    "socket.io": "^4.5.1"
   }
 }
