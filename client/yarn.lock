@@ -420,12 +420,12 @@
   resolved "https://registry.yarnpkg.com/@mantine/hooks/-/hooks-5.1.0.tgz#4877c6baf770d7873c8ca179fe85748344aaf48d"
   integrity sha512-CqG2qYQmjBpWa1vikl3yJKEYW061aa0VEgeRREnKrvQQjWHSl8ZoO6GmU5RSst85kKgN6Y4/JMAU9KdfAl2TrQ==
 
-"@mantine/notifications@^5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@mantine/notifications/-/notifications-5.1.0.tgz#0577fb85404c210d2f359e2645c74e377e2bca8a"
-  integrity sha512-am37aJUgHdE/IyuG7LMchfhKfVlwJ3UYkeEr6WgECXNILfOIlROVZzLnU2/wQ5oHsYW0VX3iMQSN6Tv2xhFiXQ==
+"@mantine/notifications@^5.2.4":
+  version "5.2.4"
+  resolved "https://registry.yarnpkg.com/@mantine/notifications/-/notifications-5.2.4.tgz#dfa2a1514a233e9475f8bf84b9328c85d266858f"
+  integrity sha512-N/UZ8KXMIz+wMWSLFe0JwPFFfg8gHmVgU6KX3DUOsUP6QEJF2RVM6zEQ7CawhVueBvxlxjiWJ17TirI7G372GQ==
   dependencies:
-    "@mantine/utils" "5.1.0"
+    "@mantine/utils" "5.2.4"
     react-transition-group "4.4.2"
 
 "@mantine/styles@5.1.0":
@@ -440,6 +440,11 @@
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/@mantine/utils/-/utils-5.1.0.tgz#82944a1390e1a13c50d111ba4024ab883c3f3fba"
   integrity sha512-rQamOcZxKiBK9M/2/qJ5pvlKVMJ6Te6RiqKMV8NbkS3HSiFt2QrJbR7bTvA4IQQMgWslLdL9TgjPeTkUbYAVKw==
+
+"@mantine/utils@5.2.4":
+  version "5.2.4"
+  resolved "https://registry.yarnpkg.com/@mantine/utils/-/utils-5.2.4.tgz#77e6f5073ab7f2b4b7727334be3698d8001091b4"
+  integrity sha512-U+3+OpGRb7GbmhLUZcWhGvZelaMJ42MW88bZXH3Cej5VpLRdx3UgLTP6EhbQBIFGTW7S53Xq7K7eCx2xdUFfhg==
 
 "@radix-ui/number@1.0.0":
   version "1.0.0"

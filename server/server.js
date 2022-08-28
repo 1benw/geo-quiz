@@ -12,23 +12,53 @@ export const io = new Server(shConfig.server.port, {
 });
 
 io.on("connection", (socket) => {
-  if (socket.handshake.query.joinType === "create") {
+  const { joinType, nickName, joinCode } = socket.handshake.query;
+  if (!nickName || nickName < 3) {
+    socket.emit("disconnectReason", "Invalid Nickname");
+    socket.disconnect();
+    return;
+  }
+
+  if (joinType === "create") {
     const gameCode = generateGameCode();
 
     gameLobbies[gameCode] = {
-      createdBy: socket.id,
+      code: gameCode,
       players: [
-        { id: socket.id, name: socket.handshake.query.nickName },
+        { id: socket.id, name: nickName, creator: true },
       ],
     }
 
     socket.data.gameCode = gameCode;
 
     socket.join(gameCode);
+    socket.emit("ready", gameCode, gameLobbies[gameCode]);
 
     console.log("Game Created", gameCode);
-  } else if (socket.handshake.query.joinType === "join") {
+  } else if (joinType === "join" && joinCode) {
     // TODO
+    if (gameLobbies[joinCode]) {
+      if (gameLobbies[joinCode].players.find(p => p.name === nickName || p.name === nickName.toLowerCase() || p.name === nickName.toUpperCase())) {
+        socket.emit("disconnectReason", "That Nickname is Taken");
+        socket.disconnect();
+        return;
+      }
+
+      gameLobbies[joinCode].players.push({
+        id: socket.id,
+        name: socket.handshake.query.nickName,
+      });
+
+      console.log('Game Joined', socket.id)
+      io.to(joinCode).emit("updatePlayers", gameLobbies[joinCode].players);
+
+      socket.join(joinCode);
+      socket.emit("ready", joinCode, gameLobbies[joinCode]);
+    } else {
+      socket.emit("disconnectReason", "Invalid Game Code");
+      socket.disconnect();
+      return;
+    }
   }
 });
 

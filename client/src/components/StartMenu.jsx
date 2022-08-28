@@ -20,7 +20,7 @@ const useStyles = createStyles((theme) => ({
   },
   actions: {
     bottom: 0,
-    height: '10%',
+    height: '30%',
     padding: '0 15%',
   },
   button: {
@@ -42,10 +42,15 @@ export default function () {
 
   const startGame = () => {
     connect(true, nickname);
+    setMenuState(false);
+    setNickname('');
   };
 
   const joinGame = () => {
-
+    connect(false, nickname, gamePin);
+    setMenuState(false);
+    setNickname('');
+    setGamePin('');
   };
 
   return (
@@ -86,11 +91,20 @@ export default function () {
                 maxLength={6}
               />
             </Grid.Col>
+            <Grid.Col span={12}>
+              <TextInput
+                placeholder="Bob"
+                label="Nickname"
+                value={nickname}
+                onChange={e => setNickname(e.currentTarget.value)}
+                maxLength={20}
+              />
+            </Grid.Col>
             <Grid.Col span={6}>
               <Button className={classes.button} fullWidth color="dark" onClick={() => setMenuState(false)}>Go Back</Button>
             </Grid.Col>
             <Grid.Col span={6}>
-              <Button className={classes.button} fullWidth>Join Game</Button>
+              <Button className={classes.button} fullWidth onClick={joinGame}>Join Game</Button>
             </Grid.Col>
           </Grid>
         </div>
