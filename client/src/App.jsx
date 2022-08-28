@@ -1,12 +1,17 @@
 import { useState } from 'react'
 import { Text } from '@mantine/core';
 
-import { StartMenu } from './components';
+import { StartMenu, WaitingScreen } from './components';
+
+import { useGameStore } from './hooks';
 
 function App() {
+  const inGame = useGameStore(state => state.connected);
+
   return (
     <>
-      <StartMenu />
+      {inGame && <WaitingScreen />}
+      {!inGame && <StartMenu />}
     </>
   )
 }

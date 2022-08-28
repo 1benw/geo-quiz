@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createStyles, TextInput, Title, Button, Grid } from '@mantine/core';
+import { createStyles, TextInput, Title, Button, Grid, Stack } from '@mantine/core';
 import Earth from '../assets/earth.svg';
 
 import { useGameStore } from '../hooks';
@@ -8,27 +8,20 @@ const useStyles = createStyles((theme) => ({
   container: {
     height: '90%',
     width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    textAlign: 'center',
   },
   quiz: {
-    top: 0,
-    height: '50%',
     padding: '2.5% 0',
+    textAlign: 'center',
   },
   actions: {
-    bottom: 0,
-    height: '30%',
     padding: '0 15%',
   },
   button: {
     marginTop: '1%',
   },
   image: {
-    width: 350,
-    height: 350,
+    width: '25vh',
+    height: '25vh',
   },
 }));
 
@@ -54,10 +47,10 @@ export default function () {
   };
 
   return (
-    <div className={classes.container}>
+    <Stack justify="space-between" className={classes.container}>
       <div className={classes.quiz}>
         <img className={classes.image} src={Earth} />
-        <Title order={1}>🌏 GeoQuiz 🌎</Title>
+        <Title align="center" order={1}>🌏 GeoQuiz 🌎</Title>
       </div>
       {(menuState === 'start' &&
         <div className={classes.actions}>
@@ -75,7 +68,7 @@ export default function () {
               <Button className={classes.button} fullWidth color="dark" onClick={() => setMenuState(false)}>Go Back</Button>
             </Grid.Col>
             <Grid.Col span={6}>
-              <Button className={classes.button} fullWidth color="green" onClick={startGame}>Start New Game</Button>
+              <Button className={classes.button} fullWidth color="green" onClick={startGame}>New Game</Button>
             </Grid.Col>
           </Grid>
         </div>
@@ -112,7 +105,7 @@ export default function () {
           <div className={classes.actions}>
             <Grid>
               <Grid.Col span={6}>
-                <Button className={classes.button} fullWidth color="green" onClick={() => setMenuState('start')}>Start New Game</Button>
+                <Button className={classes.button} fullWidth color="green" onClick={() => setMenuState('start')}>New Game</Button>
               </Grid.Col>
               <Grid.Col span={6}>
                 <Button className={classes.button} fullWidth onClick={() => setMenuState('join')}>Join Game</Button>
@@ -120,6 +113,6 @@ export default function () {
             </Grid>
           </div>
         )}
-    </div>
+    </Stack>
   )
 }

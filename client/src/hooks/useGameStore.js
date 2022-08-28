@@ -8,6 +8,8 @@ const useGameStore = create((set, get) => ({
   connected: false,
   ready: false,
   disconnectReason: null,
+  playerId: null,
+  isHost: false,
   loading: false,
   loadingText: null,
   connect: (newGame, nickName, joinCode) => {
@@ -23,7 +25,7 @@ const useGameStore = create((set, get) => ({
       query.joinCode = joinCode;
     };
 
-    const socket = io(`${shConfig.server.url}:${shConfig.server.port}`, {
+    const socket = io(`http://192.168.1.104:${shConfig.server.port}`, {
       query,
     });
 
@@ -31,7 +33,7 @@ const useGameStore = create((set, get) => ({
 
     socket.on("connect", () => {
       console.log("Connected to Server");
-      set({ connected: true });
+      set({ connected: true, playerId: socket.id });
     }).on("disconnect", (reason) => {
       console.log("Disconnected from Server");
       set({
@@ -72,9 +74,10 @@ const useGameStore = create((set, get) => ({
       socket.disconnect();
     }).on("disconnectReason", (reason) => {
       set({ disconnectReason: reason });
-    }).on("ready", (code, gameData) => {
+    }).on("ready", (isHost, code, gameData) => {
       set({
         ready: true,
+        isHost,
         code,
         players: gameData.players,
       });

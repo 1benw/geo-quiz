@@ -32,7 +32,7 @@ io.on("connection", (socket) => {
     socket.data.gameCode = gameCode;
 
     socket.join(gameCode);
-    socket.emit("ready", gameCode, gameLobbies[gameCode]);
+    socket.emit("ready", true, gameCode, gameLobbies[gameCode]);
 
     console.log("Game Created", gameCode);
   } else if (joinType === "join" && joinCode) {
@@ -50,10 +50,10 @@ io.on("connection", (socket) => {
       });
 
       console.log('Game Joined', socket.id)
-      io.to(joinCode).emit("updatePlayers", gameLobbies[joinCode].players);
 
       socket.join(joinCode);
-      socket.emit("ready", joinCode, gameLobbies[joinCode]);
+      socket.emit("ready", false, joinCode, gameLobbies[joinCode]);
+      socket.to(joinCode).emit("updatePlayers", gameLobbies[joinCode].players, socket.id);
     } else {
       socket.emit("disconnectReason", "Invalid Game Code");
       socket.disconnect();
