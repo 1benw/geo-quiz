@@ -36,6 +36,7 @@ export default function () {
   const isHost = useGameStore(state => state.isHost);
   const players = useGameStore(state => state.players);
   const gameCode = useGameStore(state => state.code);
+  const startGame = useGameStore(state => state.start);
 
   return (
     <Stack justify="space-between" className={classes.container}>
@@ -81,7 +82,7 @@ export default function () {
       <div className={classes.actions}>
         <Grid grow>
           <Grid.Col span={6}>
-            <Button className={classes.button} fullWidth color="green" disabled={!isHost}>Start Game</Button>
+            <Button className={classes.button} fullWidth color="green" onClick={startGame} disabled={!isHost}>Start Game</Button>
           </Grid.Col>
         </Grid>
       </div>

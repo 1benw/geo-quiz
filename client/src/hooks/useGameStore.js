@@ -6,12 +6,15 @@ import shConfig from "../../../shared_config.json";
 
 const useGameStore = create((set, get) => ({
   connected: false,
+  socket: null,
   ready: false,
   disconnectReason: null,
   playerId: null,
   isHost: false,
   loading: false,
   loadingText: null,
+  currentQuestion: 0,
+  questionData: null,
   connect: (newGame, nickName, joinCode) => {
     const query = {
       joinType: newGame ? "create" : "join",
@@ -25,11 +28,14 @@ const useGameStore = create((set, get) => ({
       query.joinCode = joinCode;
     };
 
-    const socket = io(`http://192.168.1.104:${shConfig.server.port}`, {
+    const socket = io(`http://${window.location.hostname}:${shConfig.server.port}`, {
       query,
     });
 
-    set({ disconnectReason: null });
+    set({
+      socket: socket,
+      disconnectReason: null
+    });
 
     socket.on("connect", () => {
       console.log("Connected to Server");
@@ -38,6 +44,7 @@ const useGameStore = create((set, get) => ({
       console.log("Disconnected from Server");
       set({
         connected: false,
+        socket: null,
         ready: false,
       });
 
@@ -84,10 +91,35 @@ const useGameStore = create((set, get) => ({
     }).on("updatePlayers", (players) => {
       console.log("New Player Joined");
       set({ players: players });
+    }).on("presentQuestion", (question, data) => {
+      get().setLoading(true, "Loading Next Question");
+      set({
+        currentQuestion: question,
+        questionData: data,
+      });
+
+      setTimeout(() => {
+        get().setLoading(false);
+      }, 2000);
     });
   },
+  start: () => {
+    const s = get();
+    if (s.connected && s.ready && s.isHost) {
+      s.socket.emit("startGame");
+    }
+  },
   setLoading: (state, text) => {
-    set({ loading: state, loadingText: text ?? false });
+    if (state) {
+      set({
+        loading: true,
+        loadingText: text ?? false
+      });
+    } else {
+      set({
+        loading: false,
+      });
+    }
   }
 }));
 

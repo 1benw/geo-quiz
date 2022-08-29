@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Loader, LoadingOverlay, Text, Stack } from '@mantine/core';
 
-import { StartMenu, WaitingScreen } from './components';
+import { StartMenu, WaitingScreen, Question } from './components';
 
 import { useGameStore } from './hooks';
 
@@ -10,6 +10,8 @@ function App() {
   const loadingText = useGameStore(state => state.loadingText);
 
   const inGame = useGameStore(state => state.connected);
+  const currentQuestion = useGameStore(state => state.currentQuestion);
+  const questionData = useGameStore(state => state.questionData);
 
   return (
     <>
@@ -26,8 +28,14 @@ function App() {
         overlayBlur={3}
         transitionDuration={500}
       />
-      {inGame && <WaitingScreen />}
       {!inGame && <StartMenu />}
+      {(inGame && !questionData) && <WaitingScreen />}
+      {(inGame && questionData) && (
+        <Question
+          questionNum={currentQuestion}
+          questionData={questionData}
+        />
+      )}
     </>
   )
 }
