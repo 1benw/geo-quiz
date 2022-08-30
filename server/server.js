@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 import shConfig from '../shared_config.json';
 import { generateGameCode } from './utils.js';
-import { getQuestion } from './questions/question.js';
+import { checkAnswer, getQuestion } from './questions/question.js';
 
 const gameLobbies = {};
 
@@ -31,6 +31,7 @@ io.on("connection", (socket) => {
       started: false,
       questions: [],
       currentQuestion: -1,
+      answers: [],
     }
 
     socket.data.gameCode = gameCode;
@@ -73,11 +74,26 @@ io.on("connection", (socket) => {
     }
   }
 
-  socket.on("giveAnswer", () => {
-    const game = gameLobbies[socket.data.gameCode]
-    if (game) {
+  socket.on("giveAnswer", (answer) => {
+    const game = gameLobbies[socket.data.gameCode];
+    if (game && game.currentQuestion >= 0 && !game.answers[game.currentQuestion][socket.id]) {
+      const question = game.questions[game.currentQuestion];
+      const correct = checkAnswer(question.type, question.data, answer);
 
-    }
+      console.log(socket.id, answer, question.question, correct);
+
+      game.answers[game.currentQuestion][socket.id] = {
+        correct,
+        answer,
+      };
+
+      const answeredPlayers = Object.keys(game.answers[game.currentQuestion]);
+      const connectedPlayers = game.players.map(p => p.id);
+
+      if (connectedPlayers.every(playerId => answeredPlayers.includes(playerId))) {
+        console.log("everyone has answered")
+      }
+    };
   });
 });
 
@@ -104,11 +120,12 @@ const playQuestion = (gameCode) => {
 
   game.currentQuestion++;
   game.questions.push(newQuestion);
+  game.answers.push({});
 
   console.log(game.currentQuestion);
 
   io.to(gameCode).emit(
-    "presentQuestion",
+    "startQuestion",
     game.currentQuestion,
     newQuestion,
   );

@@ -91,22 +91,32 @@ const useGameStore = create((set, get) => ({
     }).on("updatePlayers", (players) => {
       console.log("New Player Joined");
       set({ players: players });
-    }).on("presentQuestion", (question, data) => {
+    }).on("startQuestion", (question, data) => {
       get().setLoading(true, "Loading Next Question");
-      set({
+
+      setTimeout(() => set({
         currentQuestion: question,
         questionData: data,
-      });
+      }), 500);
 
-      setTimeout(() => {
-        get().setLoading(false);
-      }, 2000);
+      setTimeout(() => get().setLoading(false), 3000);
+    }).on("finishQuestion", (correctAnswer, results) => {
+
     });
   },
   start: () => {
     const s = get();
     if (s.connected && s.ready && s.isHost) {
       s.socket.emit("startGame");
+    }
+  },
+  sendAnswer: (data) => {
+    const s = get();
+
+    if (s.connected && s.ready && s.questionData) {
+      s.socket.emit("giveAnswer", data);
+      set({ answered: true });
+      s.setLoading(true, "Was Your Answer Correct?");
     }
   },
   setLoading: (state, text) => {
