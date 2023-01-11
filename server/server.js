@@ -1,5 +1,6 @@
 import { Server } from 'socket.io';
-import shConfig from '../shared_config.json';
+
+import shConfig from '../shared_config.json' assert { type: "json" };
 import { generateGameCode } from './utils.js';
 import { checkAnswer, getQuestion } from './questions/question.js';
 

@@ -1,4 +1,4 @@
-import topoJson from '../../topojson/countries.json';
+import topoJson from '../../topojson/countries.json' assert {type: 'json'};
 
 const validTypes = ['Sovereign country', 'Country', 'Sovereignty']; // Filter out dependencies
 const nameProperties = ['NAME', 'NAME_LONG', 'NAME_EN', 'NAME_SORT', 'FORMAL_EN'] // The names to compare answers against

@@ -28,7 +28,11 @@ const useGameStore = create((set, get) => ({
       query.joinCode = joinCode;
     };
 
-    const socket = io(`http://${window.location.hostname}:${shConfig.server.port}`, {
+    // const socket = io(`http://${window.location.hostname}:${shConfig.server.port}`, {
+    //   query,
+    // });
+
+    const socket = io(`https://3000-1benw-geoquiz-dtsncpcfjas.ws-eu81.gitpod.io/`, {
       query,
     });
 
