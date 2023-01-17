@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 
 import shConfig from '../shared_config.json' assert { type: "json" };
-import { generateGameCode } from './utils.js';
+import { generateGameCode, calculateScore } from './utils.js';
 import { checkAnswer, getQuestion } from './questions/question.js';
 
 const gameLobbies = {};
@@ -27,7 +27,7 @@ io.on("connection", (socket) => {
     const game = {
       code: gameCode,
       players: [
-        { id: socket.id, name: nickName, creator: true },
+        { id: socket.id, name: nickName, creator: true, score: 0 },
       ],
       started: false,
       questions: [],
@@ -36,15 +36,15 @@ io.on("connection", (socket) => {
     }
 
     socket.data.gameCode = gameCode;
-    socket.join(gameCode);
     socket.emit("ready", true, gameCode, game);
+    socket.join(gameCode);
 
     gameLobbies[gameCode] = game;
 
     console.log("Game Created", gameCode);
 
     socket.on("startGame", () => {
-      console.log(game.players)
+      console.log("Game Started", game.players);
       if (game.currentQuestion < 0) {
         playQuestion(gameCode);
       }
@@ -52,7 +52,7 @@ io.on("connection", (socket) => {
   } else if (joinType === "join" && joinCode) {
     const game = gameLobbies[joinCode];
     if (game) {
-      if (game.players.find(p => p.name === nickName || p.name === nickName.toLowerCase() || p.name === nickName.toUpperCase())) {
+      if (game.players.find(p => p.name.toLowerCase() === nickName.toLowerCase())) {
         socket.emit("disconnectReason", "That Nickname is Taken");
         socket.disconnect();
         return;
@@ -61,10 +61,13 @@ io.on("connection", (socket) => {
       game.players.push({
         id: socket.id,
         name: socket.handshake.query.nickName,
+        creator: false,
+        score: 0,
       });
 
-      console.log('Game Joined', socket.id)
+      console.log('Game Joined', socket.id);
 
+      socket.data.gameCode = joinCode;
       socket.join(joinCode);
       socket.emit("ready", false, joinCode, game);
       socket.to(joinCode).emit("updatePlayers", game.players, socket.id);
@@ -81,18 +84,32 @@ io.on("connection", (socket) => {
       const question = game.questions[game.currentQuestion];
       const correct = checkAnswer(question.type, question.data, answer);
 
-      console.log(socket.id, answer, question.question, correct);
-
       game.answers[game.currentQuestion][socket.id] = {
         correct,
         answer,
+        timeTaken: Date.now() - question.time,
       };
 
       const answeredPlayers = Object.keys(game.answers[game.currentQuestion]);
       const connectedPlayers = game.players.map(p => p.id);
 
       if (connectedPlayers.every(playerId => answeredPlayers.includes(playerId))) {
-        console.log("everyone has answered")
+        // Order player IDs in the time taken to answer
+        const answerOrder = [...answeredPlayers].sort((a, b) => game.answers[game.currentQuestion][a].timeTaken - game.answers[game.currentQuestion][b].timeTaken);
+
+        console.log("everyone has answered, order: ", answerOrder)
+        // Now the scores can be calculated as everyones time can be considered
+        game.players = game.players.map(player => {
+          const roundResults = game.answers[game.currentQuestion][player.id];
+          roundResults.score = calculateScore(player.id, roundResults.correct, answerOrder);;
+
+          return {
+            ...player,
+            score: player.score + roundResults.score
+          }
+        });
+
+        console.log(game.players);
       }
     };
   });
@@ -123,7 +140,7 @@ const playQuestion = (gameCode) => {
   game.questions.push(newQuestion);
   game.answers.push({});
 
-  console.log(game.currentQuestion);
+  console.log("New Question", game.currentQuestion, newQuestion);
 
   io.to(gameCode).emit(
     "startQuestion",

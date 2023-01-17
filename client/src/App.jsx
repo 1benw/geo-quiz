@@ -10,8 +10,24 @@ function App() {
   const loadingText = useGameStore(state => state.loadingText);
 
   const inGame = useGameStore(state => state.connected);
+  const gameState = useGameStore(state => state.state);
   const currentQuestion = useGameStore(state => state.currentQuestion);
   const questionData = useGameStore(state => state.questionData);
+
+  // Get the correct game component to display for the current game state
+  const getGameComponent = () => {
+    switch(gameState) {
+      case 0:
+        return <WaitingScreen />;
+      case 1:
+        return <Question
+          questionNum={currentQuestion}
+          questionData={questionData}
+        />;
+      case 2:
+        
+    }
+  }
 
   return (
     <>
@@ -29,13 +45,7 @@ function App() {
         transitionDuration={500}
       />
       {!inGame && <StartMenu />}
-      {(inGame && !questionData) && <WaitingScreen />}
-      {(inGame && questionData) && (
-        <Question
-          questionNum={currentQuestion}
-          questionData={questionData}
-        />
-      )}
+      {inGame && getGameComponent()}
     </>
   )
 }

@@ -24,3 +24,26 @@ export const generateGameCode = () => {
 
   return code;
 }
+
+// The extra reward recieved for answering the question quickly e.g 1st, 2nd, 3rd fastest
+const speedReward = {
+  1: 5,
+  2: 4,
+  3: 3,
+}
+
+export const calculateScore = (playerId, correct, answerOrder) => {
+  if (correct) {
+    let pointBase = 5;
+
+    const answerPos = answerOrder.findIndex(p => p == playerId) + 1;
+
+    if (answerPos > 0 && speedReward[answerPos]) {
+      pointBase += speedReward[answerPos]
+    }
+
+    return pointBase;
+  } else {
+    return 0;
+  }
+};

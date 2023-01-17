@@ -23,6 +23,7 @@ const GuessCountryWorld = {
     console.log(randomCountry.properties.NAME_EN)
 
     return {
+      time: Date.now(),
       type: this.type,
       question: `Name the Highlighted Country`,
       data: {

@@ -15,6 +15,7 @@ const useGameStore = create((set, get) => ({
   loadingText: null,
   currentQuestion: 0,
   questionData: null,
+  state: 0,
   connect: (newGame, nickName, joinCode) => {
     const query = {
       joinType: newGame ? "create" : "join",
@@ -32,7 +33,7 @@ const useGameStore = create((set, get) => ({
     //   query,
     // });
 
-    const socket = io(`https://3000-1benw-geoquiz-dtsncpcfjas.ws-eu81.gitpod.io/`, {
+    const socket = io(`https://3000-1benw-geoquiz-dtsncpcfjas.ws-eu82.gitpod.io/`, {
       query,
     });
 
@@ -96,11 +97,13 @@ const useGameStore = create((set, get) => ({
       console.log("New Player Joined");
       set({ players: players });
     }).on("startQuestion", (question, data) => {
+      console.log("RECEIVE QUESTION DATA FROM SOCKET")
       get().setLoading(true, "Loading Next Question");
 
       setTimeout(() => set({
         currentQuestion: question,
         questionData: data,
+        state: 1,
       }), 500);
 
       setTimeout(() => get().setLoading(false), 3000);
