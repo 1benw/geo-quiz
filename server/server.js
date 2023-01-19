@@ -110,6 +110,8 @@ io.on("connection", (socket) => {
         });
 
         console.log(game.players);
+
+        io.to(game.code).emit("finishQuestion", game.players, "Answer", game.answers[game.currentQuestion]);
       }
     };
   });

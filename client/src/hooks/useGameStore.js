@@ -16,6 +16,29 @@ const useGameStore = create((set, get) => ({
   currentQuestion: 0,
   questionData: null,
   state: 0,
+  latestResults: null,
+  latestAnswer: null,
+
+  // connected: true,
+  // state: 2,
+  // players: [
+  //   { id: 1, name: "bob", score: 7 },
+  //   { id: 1, name: "bob", score: 7 },
+  //   { id: 1, name: "bob", score: 7 },
+  //   { id: 1, name: "bob", score: 7 },
+  //   { id: 1, name: "bob", score: 7 },
+  //   { id: 1, name: "bob", score: 7 },
+  //   { id: 1, name: "bob", score: 7 },
+  //   { id: 1, name: "bob", score: 7 },
+  //   { id: 1, name: "bob", score: 7 },
+  //   { id: 1, name: "bob", score: 7 },
+  //   { id: 1, name: "bob", score: 7 },
+  //   { id: 2, name: "bob", score: 7 },
+  // ],
+  // latestResults: {
+  //   1: { score: 1 },
+  //   2: { score: 0 },
+  // },
   connect: (newGame, nickName, joinCode) => {
     const query = {
       joinType: newGame ? "create" : "join",
@@ -107,8 +130,18 @@ const useGameStore = create((set, get) => ({
       }), 500);
 
       setTimeout(() => get().setLoading(false), 3000);
-    }).on("finishQuestion", (correctAnswer, results) => {
+    }).on("finishQuestion", (players, correctAnswer, results) => {
+      console.log("finish Question")
+      setTimeout(() => {
+        set({
+          state: 2,
+          players: players,
+          latestAnswer: correctAnswer,
+          latestResults: results,
+        });
 
+        get().setLoading(false);
+      }, 1000);
     });
   },
   start: () => {

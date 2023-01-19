@@ -1,11 +1,25 @@
 import { useState } from 'react'
-import { Loader, LoadingOverlay, Text, Stack } from '@mantine/core';
+import { createStyles, Loader, LoadingOverlay, Text, Stack, Transition } from '@mantine/core';
 
-import { StartMenu, WaitingScreen, Question } from './components';
+import { StartMenu, WaitingScreen, Question, RoundResults } from './components';
 
 import { useGameStore } from './hooks';
 
+const useStyles = createStyles((theme) => ({
+  resultOverlay: {
+    position: 'fixed',
+    top: 0,
+    width: '100%',
+    height: '100%',
+    zIndex: 1,
+    background: '#1a1b1ebf',
+    backdropFilter: 'blur(.5px)',
+  }
+}));
+
+
 function App() {
+  const { classes } = useStyles();
   const loading = useGameStore(state => state.loading);
   const loadingText = useGameStore(state => state.loadingText);
 
@@ -20,12 +34,11 @@ function App() {
       case 0:
         return <WaitingScreen />;
       case 1:
+      case 2:
         return <Question
           questionNum={currentQuestion}
           questionData={questionData}
         />;
-      case 2:
-        
     }
   }
 
@@ -46,6 +59,16 @@ function App() {
       />
       {!inGame && <StartMenu />}
       {inGame && getGameComponent()}
+      <Transition mounted={inGame && gameState == 2} transition="fade" duration={400} timingFunction="ease">
+        {(styles) => <div className={classes.resultOverlay} style={styles}>
+          <RoundResults />
+        </div>}
+      </Transition>
+      {/* {(inGame && gameState == 2) && (
+        <div className={classes.resultOverlay}>
+          <RoundResults />
+        </div>
+      )} */}
     </>
   )
 }
