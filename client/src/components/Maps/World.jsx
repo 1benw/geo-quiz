@@ -1,8 +1,10 @@
 import { createStyles, useMantineTheme } from '@mantine/core';
+import { useState, useEffect } from 'react';
+import { useGameStore } from '../../hooks';
+import { ComposableMap, Geographies, Geography, Graticule } from 'react-simple-maps';
 
-import { ComposableMap, Geographies, Geography, Graticule, ZoomableGroup } from 'react-simple-maps';
-
-import WorldTopo from '../../../../topojson/countries.json';
+import ZoomableGroup from '../CustomZoomableGroup';
+import WorldTopo from '../../../../topojson/countries2.json';
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -21,14 +23,20 @@ const CountryTopos = WorldTopo?.objects?.ne_10m_admin_0_countries_gbr?.geometrie
 export default function ({ highlightCountry, onSelect = null }) {
   const theme = useMantineTheme();
   const { classes } = useStyles();
+  const answered = useGameStore(state => state.answered);
+  const [state, setState] = useState({
+    zoom: 30,
+    center: [0, 0]
+  });
+  
+  useEffect(() => {
+    const countryProperties = CountryTopos.find(c => c.properties.ADM0_A3_GB === highlightCountry)?.properties;
 
-  let countryProperties = null;
-  if (highlightCountry) {
-    countryProperties = CountryTopos.find(c => c.properties.ADM0_A3_GB === highlightCountry)?.properties;
-    console.log(countryProperties);
-  }
-
-  const mapCenter = countryProperties ? [countryProperties.LABEL_X, countryProperties.LABEL_Y] : [0, 0];
+    setState({
+      zoom: countryProperties?.scalerank > 0 ? 30 : 6,
+      center: countryProperties ? [countryProperties.LABEL_X, countryProperties.LABEL_Y] : [0, 0],
+    });
+  }, [highlightCountry, answered]);
 
   return (
     <div className={classes.container}>
@@ -42,7 +50,7 @@ export default function ({ highlightCountry, onSelect = null }) {
           //scale: 400
         }}
       >
-        <ZoomableGroup center={mapCenter} maxZoom={30} minZoom={4} zoom={countryProperties?.scalerank > 0 ? 30 : 6}>
+        <ZoomableGroup center={state.center} maxZoom={30} minZoom={4} zoom={state.zoom}>
           <Geographies geography={WorldTopo}>
             {({ geographies }) =>
               geographies.map((geo) => {
@@ -73,7 +81,6 @@ export default function ({ highlightCountry, onSelect = null }) {
                       }}
                       onClick={
                         onSelect !== null ? () => {
-                          console.log(geo.properties.ADM0_A3_GB);
                           onSelect(geo.properties.ADM0_A3_GB);
                         } : null
                       }

@@ -1,4 +1,5 @@
 import { Server } from 'socket.io';
+import fs from 'fs';
 
 import shConfig from '../shared_config.json' assert { type: "json" };
 import { generateGameCode, calculateScore } from './utils.js';
@@ -111,7 +112,7 @@ io.on("connection", (socket) => {
 
         console.log(game.players);
 
-        io.to(game.code).emit("finishQuestion", game.players, "Answer", game.answers[game.currentQuestion]);
+        io.to(game.code).emit("finishQuestion", game.players, question.displayedAnswer, game.answers[game.currentQuestion]);
       }
     };
   });
@@ -150,3 +151,70 @@ const playQuestion = (gameCode) => {
     newQuestion,
   );
 }
+
+
+// fs.readFile('../topojson/countries.json', 'utf8', async function readFileCallback(err, data){
+//   if (err){
+//       console.log(err);
+//   } else {
+//   const obj = JSON.parse(data); //now it an object
+//   //console.log(obj)
+
+//   obj.objects.ne_10m_admin_0_countries_gbr.geometries = obj.objects.ne_10m_admin_0_countries_gbr?.geometries.map(e => {
+//     //console.log(e)
+
+//     return {
+//       ...e,
+//       properties: {
+//         ADM0_A3_GB: e.properties.ADM0_A3_GB,
+//         NAME: e.properties.NAME,
+//         NAME_LONG: e.properties.NAME_LONG,
+//         NAME_EN: e.properties.NAME_EN,
+//         NAME_SORT: e.properties.NAME_SORT,
+//         FORMAL_EN: e.properties.FORMAL_EN,
+//         CONTINENT: e.properties.CONTINENT,
+//         REGION_UN: e.properties.REGION_UN,
+//         SUBREGION: e.properties.SUBREGION,
+//         TYPE: e.properties.TYPE,
+//         TLC: e.properties.TLC,
+//         featurecla: e.properties.featurecla,
+//         scalerank: e.properties.scalerank,
+//         POP_EST: e.properties.POP_EST,
+//         POP_RANK: e.properties.POP_EST,
+//         POP_YEAR: e.properties.POP_YEAR,
+//         INCOME_GRP: e.properties.INCOME_GRP,
+//         ECONOMY: e.properties.ECONOMY,
+//         NAME_CIAWF: e.properties.NAME_CIAWF,
+//         LABEL_X: e.properties.LABEL_X,
+//         LABEL_Y: e.properties.LABEL_Y,
+//         FCLASS_ISO: e.properties.FCLASS_ISO,
+//         ISO_A2: e.properties.ISO_A2,
+//         ISO_A3: e.properties.ISO_A3,
+//         ISO_N3: e.properties.ISO_N3,
+//         FCLASS_ISO: e.properties.FCLASS_ISO,
+//         FCLASS_TLC: e.properties.FCLASS_TLC,
+//       }
+//     }
+//   })
+
+//   console.log(obj.objects.ne_10m_admin_0_countries_gbr.geometries)
+
+  
+
+
+//   // obj.table.push({id: 2, square:3}); //add some data
+//   // const json = JSON.stringify(obj); //convert it back to json
+//   // fs.writeFile('../topojson/countries2.json', json, 'utf8', () => {
+
+//   // }); // write it back 
+
+//   const s = await fs.promises.stat("../topojson/countries2.json")
+
+//   console.log(s.size / (1024*1024))
+
+//   const s2 = await fs.promises.stat("../topojson/countries.json")
+
+//   console.log(s2.size / (1024*1024))
+
+
+// }});

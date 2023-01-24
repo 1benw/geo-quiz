@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { createStyles, useMantineTheme, Card, Text, Center, TextInput, Button } from '@mantine/core';
+import { createStyles, useMantineTheme, Card, Text, Center, TextInput, Button, Transition } from '@mantine/core';
 import { useFocusTrap } from '@mantine/hooks';
 
 import { WorldMap } from '..';
+import { useGameStore } from '../../hooks';
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -23,6 +24,7 @@ export default function ({ question, description, country, onSubmitAnswer }) {
   const { classes } = useStyles();
   const focusTrapRef = useFocusTrap();
   const [answer, setAnswer] = useState('');
+  const gameState = useGameStore(state => state.state);
 
   const onInternalSubmit = () => {
     onSubmitAnswer(answer);
@@ -31,39 +33,45 @@ export default function ({ question, description, country, onSubmitAnswer }) {
   return (
     <div className={classes.container}>
       <Center style={{ width: '100%' }}>
-        <Card
-          className={classes.infoCard}
-          shadow="sm"
-          p="md"
-          mx="md"
-        >
-          <Text weight={500} size="lg">
-            {question}
-          </Text>
-
-          {description && (
-            <Text mt="xs" color="dimmed" size="sm">
-              {description}
+        <Transition mounted={gameState !== 2} transition="slide-down" duration={500} timingFunction="ease">
+          {(styles) => <Card
+            className={classes.infoCard}
+            style={styles}
+            shadow="sm"
+            p="md"
+            mx="md"
+          >
+            <Text weight={500} size="lg">
+              {question}
             </Text>
-          )}
-        </Card>
+
+            {description && (
+              <Text mt="xs" color="dimmed" size="sm">
+                {description}
+              </Text>
+            )}
+          </Card>}
+        </Transition>
       </Center>
       <Center style={{ width: '100%' }}>
-        <Card
-          className={classes.inputCard}
-          shadow="sm"
-          p="md"
-          ref={focusTrapRef}
-        >
-          <TextInput
-            placeholder="Answer"
-            value={answer}
-            onChange={e => setAnswer(e.currentTarget.value)}
-            data-autofocus
-            autoComplete="off"
-          />
-          <Button fullWidth mt="sm" onClick={onInternalSubmit}>Submit</Button>
-        </Card>
+        <Transition mounted={gameState !== 2} transition="slide-up" duration={500} timingFunction="ease">
+          {(styles) => <Card
+            className={classes.inputCard}
+            shadow="sm"
+            p="md"
+            style={styles}
+            ref={focusTrapRef}
+          >
+            <TextInput
+              placeholder="Answer"
+              value={answer}
+              onChange={e => setAnswer(e.currentTarget.value)}
+              data-autofocus
+              autoComplete="off"
+            />
+            <Button fullWidth mt="sm" onClick={onInternalSubmit}>Submit</Button>
+          </Card>}
+        </Transition>
       </Center>
       <WorldMap highlightCountry={country} />
     </div>

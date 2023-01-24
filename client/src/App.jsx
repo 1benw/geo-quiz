@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useState, lazy } from 'react'
 import { createStyles, Loader, LoadingOverlay, Text, Stack, Transition } from '@mantine/core';
 
 import { StartMenu, WaitingScreen, Question, RoundResults } from './components';
 
 import { useGameStore } from './hooks';
+
+import WorldTopo from '../../topojson/countries.json';
 
 const useStyles = createStyles((theme) => ({
   resultOverlay: {
@@ -27,6 +29,8 @@ function App() {
   const gameState = useGameStore(state => state.state);
   const currentQuestion = useGameStore(state => state.currentQuestion);
   const questionData = useGameStore(state => state.questionData);
+
+  console.log(WorldTopo)
 
   // Get the correct game component to display for the current game state
   const getGameComponent = () => {

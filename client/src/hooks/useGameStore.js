@@ -56,7 +56,7 @@ const useGameStore = create((set, get) => ({
     //   query,
     // });
 
-    const socket = io(`https://3000-1benw-geoquiz-dtsncpcfjas.ws-eu82.gitpod.io/`, {
+    const socket = io(`https://3000-1benw-geoquiz-dtsncpcfjas.ws-eu83.gitpod.io`, {
       query,
     });
 
@@ -132,6 +132,7 @@ const useGameStore = create((set, get) => ({
       setTimeout(() => get().setLoading(false), 3000);
     }).on("finishQuestion", (players, correctAnswer, results) => {
       console.log("finish Question")
+      set({ answered: false });
       setTimeout(() => {
         set({
           state: 2,

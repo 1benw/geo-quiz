@@ -1,4 +1,4 @@
-import topoJson from '../../topojson/countries.json' assert {type: 'json'};
+import topoJson from '../../topojson/countries2.json' assert {type: 'json'};
 
 const validTypes = ['Sovereign country', 'Country', 'Sovereignty']; // Filter out dependencies
 const nameProperties = ['NAME', 'NAME_LONG', 'NAME_EN', 'NAME_SORT', 'FORMAL_EN'] // The names to compare answers against
@@ -28,7 +28,8 @@ const GuessCountryWorld = {
       question: `Name the Highlighted Country`,
       data: {
         id: randomCountry.properties.ADM0_A3_GB,
-      }
+      },
+      displayedAnswer: randomCountry.properties.NAME,
     }
   },
   checkAnswer(questionData, answer) {

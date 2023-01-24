@@ -3,6 +3,9 @@ import { useGameStore } from '../hooks';
 
 export default function ({ questionNum, questionData }) {
   const sendAnswer = useGameStore(state => state.sendAnswer);
+  const sentAnswer = useGameStore(state => state.answered);
+
+  //if (sentAnswer) return null;
 
   switch(questionData?.type) {
     case 'guess-country':
