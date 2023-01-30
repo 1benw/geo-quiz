@@ -1,8 +1,8 @@
-import topoJson from '../../topojson/countries2.json' assert {type: 'json'};
+import topoJson from '../../topojson/ne_50m_admin_0_countries2.json' assert {type: 'json'};
 
 const validTypes = ['Sovereign country', 'Country', 'Sovereignty']; // Filter out dependencies
 const nameProperties = ['NAME', 'NAME_LONG', 'NAME_EN', 'NAME_SORT', 'FORMAL_EN'] // The names to compare answers against
-const countries = topoJson.objects?.ne_10m_admin_0_countries_gbr?.geometries.filter(c => validTypes.some(t => t === c.properties.TYPE));
+const countries = topoJson.objects?.ne_50m_admin_0_countries?.geometries.filter(c => validTypes.some(t => t === c.properties.TYPE));
 
 const doesAnswerMatch = (a, s) => {
   // Replace St. and St with Saint so that even the abbrevation matches certain countries
@@ -29,7 +29,7 @@ const GuessCountryWorld = {
       data: {
         id: randomCountry.properties.ADM0_A3_GB,
       },
-      displayedAnswer: randomCountry.properties.NAME,
+      displayedAnswer: randomCountry.properties.NAME_EN,
     }
   },
   checkAnswer(questionData, answer) {

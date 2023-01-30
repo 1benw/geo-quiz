@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createStyles, useMantineTheme, Card, Text, Center, TextInput, Button, Transition } from '@mantine/core';
 import { useFocusTrap } from '@mantine/hooks';
 
@@ -28,7 +28,8 @@ export default function ({ question, description, country, onSubmitAnswer }) {
 
   const onInternalSubmit = () => {
     onSubmitAnswer(answer);
-  }
+    setAnswer('');
+  };
 
   return (
     <div className={classes.container}>

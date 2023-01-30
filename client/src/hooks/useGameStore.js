@@ -4,11 +4,11 @@ import { showNotification } from '@mantine/notifications';
 
 import shConfig from "../../../shared_config.json";
 
-const useGameStore = create((set, get) => ({
+const initialState = {
   connected: false,
   socket: null,
   ready: false,
-  disconnectReason: null,
+  //disconnectReason: null,
   playerId: null,
   isHost: false,
   loading: false,
@@ -18,7 +18,10 @@ const useGameStore = create((set, get) => ({
   state: 0,
   latestResults: null,
   latestAnswer: null,
+};
 
+const useGameStore = create((set, get) => ({
+  ...initialState,
   // connected: true,
   // state: 2,
   // players: [
@@ -56,7 +59,7 @@ const useGameStore = create((set, get) => ({
     //   query,
     // });
 
-    const socket = io(`https://3000-1benw-geoquiz-dtsncpcfjas.ws-eu83.gitpod.io`, {
+    const socket = io(`https://3000-1benw-geoquiz-dtsncpcfjas.ws-eu84.gitpod.io`, {
       query,
     });
 
@@ -71,9 +74,7 @@ const useGameStore = create((set, get) => ({
     }).on("disconnect", (reason) => {
       console.log("Disconnected from Server");
       set({
-        connected: false,
-        socket: null,
-        ready: false,
+        ...initialState,
       });
 
       switch (reason) {
@@ -123,13 +124,13 @@ const useGameStore = create((set, get) => ({
       console.log("RECEIVE QUESTION DATA FROM SOCKET")
       get().setLoading(true, "Loading Next Question");
 
-      setTimeout(() => set({
+      set({
         currentQuestion: question,
         questionData: data,
         state: 1,
-      }), 500);
+      });
 
-      setTimeout(() => get().setLoading(false), 3000);
+      setTimeout(() => get().setLoading(false), 2000);
     }).on("finishQuestion", (players, correctAnswer, results) => {
       console.log("finish Question")
       set({ answered: false });
@@ -142,7 +143,7 @@ const useGameStore = create((set, get) => ({
         });
 
         get().setLoading(false);
-      }, 1000);
+      }, 500);
     });
   },
   start: () => {

@@ -1,10 +1,10 @@
 import { createStyles, useMantineTheme } from '@mantine/core';
 import { useState, useEffect } from 'react';
 import { useGameStore } from '../../hooks';
-import { ComposableMap, Geographies, Geography, Graticule } from 'react-simple-maps';
+import { Marker, ComposableMap, Geographies, Geography, Graticule } from 'react-simple-maps';
 
 import ZoomableGroup from '../CustomZoomableGroup';
-import WorldTopo from '../../../../topojson/countries2.json';
+import WorldTopo from '../../../../topojson/ne_50m_admin_0_countries2.json';
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -18,7 +18,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-const CountryTopos = WorldTopo?.objects?.ne_10m_admin_0_countries_gbr?.geometries ?? [];
+const CountryTopos = WorldTopo?.objects?.ne_50m_admin_0_countries?.geometries ?? [];
 
 export default function ({ highlightCountry, onSelect = null }) {
   const theme = useMantineTheme();
@@ -31,9 +31,9 @@ export default function ({ highlightCountry, onSelect = null }) {
   
   useEffect(() => {
     const countryProperties = CountryTopos.find(c => c.properties.ADM0_A3_GB === highlightCountry)?.properties;
-
+    console.log(countryProperties?.scalerank)
     setState({
-      zoom: countryProperties?.scalerank > 0 ? 30 : 6,
+      zoom: countryProperties?.scalerank > 0 ? 50 : 6,
       center: countryProperties ? [countryProperties.LABEL_X, countryProperties.LABEL_Y] : [0, 0],
     });
   }, [highlightCountry, answered]);
@@ -46,8 +46,8 @@ export default function ({ highlightCountry, onSelect = null }) {
         style={{ height: '100%' }}
         projection="geoMercator"
         projectionConfig={{
-          //rotate: [-100.0, 0, 0],
-          //scale: 400
+          // rotate: [-100.0, 0, 0],
+          // scale: 400
         }}
       >
         <ZoomableGroup center={state.center} maxZoom={30} minZoom={4} zoom={state.zoom}>
@@ -90,6 +90,9 @@ export default function ({ highlightCountry, onSelect = null }) {
               })
             }
           </Geographies>
+          {(highlightCountry && state.center) && <Marker coordinates={state.center}>
+            <circle r={1} fill={`${theme.colors.red[8]}B2`} />
+          </Marker>}
         </ZoomableGroup>
       </ComposableMap>
     </div>

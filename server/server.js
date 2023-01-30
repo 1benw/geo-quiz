@@ -26,11 +26,11 @@ io.on("connection", (socket) => {
     const gameCode = generateGameCode();
 
     const game = {
+      state: 0,
       code: gameCode,
       players: [
         { id: socket.id, name: nickName, creator: true, score: 0 },
       ],
-      started: false,
       questions: [],
       currentQuestion: -1,
       answers: [],
@@ -45,9 +45,10 @@ io.on("connection", (socket) => {
     console.log("Game Created", gameCode);
 
     socket.on("startGame", () => {
-      console.log("Game Started", game.players);
+      console.log("Game Started", socket.data.gameCode);
+      gameLobbies[socket.data.gameCode].state = 1;
       if (game.currentQuestion < 0) {
-        playQuestion(gameCode);
+        playQuestion(socket.data.gameCode);
       }
     });
   } else if (joinType === "join" && joinCode) {
@@ -91,29 +92,7 @@ io.on("connection", (socket) => {
         timeTaken: Date.now() - question.time,
       };
 
-      const answeredPlayers = Object.keys(game.answers[game.currentQuestion]);
-      const connectedPlayers = game.players.map(p => p.id);
-
-      if (connectedPlayers.every(playerId => answeredPlayers.includes(playerId))) {
-        // Order player IDs in the time taken to answer
-        const answerOrder = [...answeredPlayers].sort((a, b) => game.answers[game.currentQuestion][a].timeTaken - game.answers[game.currentQuestion][b].timeTaken);
-
-        console.log("everyone has answered, order: ", answerOrder)
-        // Now the scores can be calculated as everyones time can be considered
-        game.players = game.players.map(player => {
-          const roundResults = game.answers[game.currentQuestion][player.id];
-          roundResults.score = calculateScore(player.id, roundResults.correct, answerOrder);;
-
-          return {
-            ...player,
-            score: player.score + roundResults.score
-          }
-        });
-
-        console.log(game.players);
-
-        io.to(game.code).emit("finishQuestion", game.players, question.displayedAnswer, game.answers[game.currentQuestion]);
-      }
+      isGameRoundComplete(game.code);
     };
   });
 });
@@ -127,6 +106,8 @@ io.of("/").adapter.on("leave-room", (room, id) => {
     // If there are no players left, delete the room
     if (game.players.length <= 0) {
       delete gameLobbies[room];
+    } else {
+      isGameRoundComplete(game.code);
     }
   };
 });
@@ -139,6 +120,7 @@ const playQuestion = (gameCode) => {
 
   const newQuestion = getQuestion();
 
+  game.state = 2;
   game.currentQuestion++;
   game.questions.push(newQuestion);
   game.answers.push({});
@@ -150,17 +132,53 @@ const playQuestion = (gameCode) => {
     game.currentQuestion,
     newQuestion,
   );
-}
+};
+
+const isGameRoundComplete = (gameId) => {
+  const game = gameLobbies[gameId];
+  if (game && game.state === 2) {
+    const question = game.questions[game.currentQuestion];
+
+    const answeredPlayers = Object.keys(game.answers[game.currentQuestion]);
+    const connectedPlayers = game.players.map(p => p.id);
+
+    // If Every Player in Game Has Answered
+    if (connectedPlayers.every(playerId => answeredPlayers.includes(playerId))) {
+      game.state = 3;
+      // Order player IDs in the time taken to answer
+      const answerOrder = [...answeredPlayers].sort((a, b) => game.answers[game.currentQuestion][a].timeTaken - game.answers[game.currentQuestion][b].timeTaken);
+
+      console.log("everyone has answered, order: ", answerOrder)
+      // Now the scores can be calculated as everyones time can be considered
+      game.players = game.players.map(player => {
+        const roundResults = game.answers[game.currentQuestion][player.id];
+        roundResults.score = calculateScore(player.id, roundResults.correct, answerOrder);;
+
+        return {
+          ...player,
+          score: player.score + roundResults.score
+        }
+      });
+
+      console.log(game.players);
+
+      io.to(game.code).emit("finishQuestion", game.players, question.displayedAnswer, game.answers[game.currentQuestion]);
+      setTimeout(() => {
+        playQuestion(game.code);
+      }, 20 * 1000);
+    };
+  };
+};
 
 
-// fs.readFile('../topojson/countries.json', 'utf8', async function readFileCallback(err, data){
+// fs.readFile('../topojson/ne_50m_admin_0_countries.json', 'utf8', async function readFileCallback(err, data){
 //   if (err){
 //       console.log(err);
 //   } else {
 //   const obj = JSON.parse(data); //now it an object
 //   //console.log(obj)
 
-//   obj.objects.ne_10m_admin_0_countries_gbr.geometries = obj.objects.ne_10m_admin_0_countries_gbr?.geometries.map(e => {
+//   obj.objects.ne_50m_admin_0_countries.geometries = obj.objects.ne_50m_admin_0_countries?.geometries.map(e => {
 //     //console.log(e)
 
 //     return {
@@ -197,22 +215,22 @@ const playQuestion = (gameCode) => {
 //     }
 //   })
 
-//   console.log(obj.objects.ne_10m_admin_0_countries_gbr.geometries)
+//   console.log(obj.objects.ne_50m_admin_0_countries.geometries)
 
   
 
 
 //   // obj.table.push({id: 2, square:3}); //add some data
-//   // const json = JSON.stringify(obj); //convert it back to json
-//   // fs.writeFile('../topojson/countries2.json', json, 'utf8', () => {
+//   const json = JSON.stringify(obj); //convert it back to json
+//   fs.writeFile('../topojson/ne_50m_admin_0_countries2.json', json, 'utf8', () => {
 
-//   // }); // write it back 
+//   }); // write it back 
 
-//   const s = await fs.promises.stat("../topojson/countries2.json")
+//   const s = await fs.promises.stat("../topojson/ne_50m_admin_0_countries2.json")
 
 //   console.log(s.size / (1024*1024))
 
-//   const s2 = await fs.promises.stat("../topojson/countries.json")
+//   const s2 = await fs.promises.stat("../topojson/ne_50m_admin_0_countries.json")
 
 //   console.log(s2.size / (1024*1024))
 
