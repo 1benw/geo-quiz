@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createStyles, TextInput, Title, Button, Grid, Stack } from '@mantine/core';
+import { createStyles, TextInput, Title, Button, Grid, Stack, NumberInput } from '@mantine/core';
 import Earth from '../assets/earth.svg';
 
 import { useGameStore } from '../hooks';
@@ -30,17 +30,24 @@ export default function () {
   const [menuState, setMenuState] = useState(false);
   const [nickname, setNickname] = useState('');
   const [gamePin, setGamePin] = useState('');
-
+  const [numQuestions, setNumQuestions] = useState(5);
   const connect = useGameStore(state => state.connect);
 
   const startGame = () => {
-    connect(true, nickname);
+    connect(true, {
+      nickname, 
+      questions: numQuestions,
+    });
     setMenuState(false);
     setNickname('');
   };
 
   const joinGame = () => {
-    connect(false, nickname, gamePin);
+    connect(false, {
+      nickname,
+      gamePin: gamePin,
+      questions: numQuestions,
+    });
     setMenuState(false);
     setNickname('');
     setGamePin('');
@@ -62,6 +69,13 @@ export default function () {
                 value={nickname}
                 onChange={e => setNickname(e.currentTarget.value)}
                 maxLength={20}
+              />
+            </Grid.Col>
+            <Grid.Col span={12}>
+              <NumberInput
+                label="Number of Questions"
+                value={numQuestions}
+                onChange={num => setNumQuestions(parseInt(num))}
               />
             </Grid.Col>
             <Grid.Col span={6}>

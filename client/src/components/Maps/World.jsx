@@ -31,9 +31,9 @@ export default function ({ highlightCountry, onSelect = null }) {
   
   useEffect(() => {
     const countryProperties = CountryTopos.find(c => c.properties.ADM0_A3_GB === highlightCountry)?.properties;
-    console.log(countryProperties?.scalerank)
+    //console.log(countryProperties?.LABELRANK)
     setState({
-      zoom: countryProperties?.scalerank > 0 ? 50 : 6,
+      zoom: countryProperties?.LABELRANK >= 6 ? 40 : 6,
       center: countryProperties ? [countryProperties.LABEL_X, countryProperties.LABEL_Y] : [0, 0],
     });
   }, [highlightCountry, answered]);

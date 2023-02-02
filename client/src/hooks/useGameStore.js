@@ -18,6 +18,8 @@ const initialState = {
   state: 0,
   latestResults: null,
   latestAnswer: null,
+  progressTimer: null,
+  progressTimerEnd: null,
 };
 
 const useGameStore = create((set, get) => ({
@@ -42,24 +44,28 @@ const useGameStore = create((set, get) => ({
   //   1: { score: 1 },
   //   2: { score: 0 },
   // },
-  connect: (newGame, nickName, joinCode) => {
+  connect: (newGame, data) => {
     const query = {
       joinType: newGame ? "create" : "join",
     };
 
-    if (nickName) {
-      query.nickName = nickName;
+    if (data.nickname) {
+      query.nickname = data.nickname;
     };
 
-    if (joinCode) {
-      query.joinCode = joinCode;
+    if (data.questions) {
+      query.questions = data.questions;
+    };
+
+    if (data.gamePin) {
+      query.joinCode = data.gamePin;
     };
 
     // const socket = io(`http://${window.location.hostname}:${shConfig.server.port}`, {
     //   query,
     // });
 
-    const socket = io(`https://3000-1benw-geoquiz-dtsncpcfjas.ws-eu84.gitpod.io`, {
+    const socket = io(`https://3000-1benw-geoquiz-dtsncpcfjas.ws-eu85.gitpod.io`, {
       query,
     });
 
@@ -121,29 +127,9 @@ const useGameStore = create((set, get) => ({
       console.log("New Player Joined");
       set({ players: players });
     }).on("startQuestion", (question, data) => {
-      console.log("RECEIVE QUESTION DATA FROM SOCKET")
-      get().setLoading(true, "Loading Next Question");
-
-      set({
-        currentQuestion: question,
-        questionData: data,
-        state: 1,
-      });
-
-      setTimeout(() => get().setLoading(false), 2000);
+      get().startQuestion(question, data);
     }).on("finishQuestion", (players, correctAnswer, results) => {
-      console.log("finish Question")
-      set({ answered: false });
-      setTimeout(() => {
-        set({
-          state: 2,
-          players: players,
-          latestAnswer: correctAnswer,
-          latestResults: results,
-        });
-
-        get().setLoading(false);
-      }, 500);
+      get().finishQuestion(players, correctAnswer, results);
     });
   },
   start: () => {
@@ -152,6 +138,20 @@ const useGameStore = create((set, get) => ({
       s.socket.emit("startGame");
     }
   },
+
+  startQuestion: (question, data) => {
+    get().clearProgressTimer();
+    get().setLoading(true, "Loading Next Question");
+
+    set({
+      currentQuestion: question,
+      questionData: data,
+      state: 1,
+    });
+
+    setTimeout(() => get().setLoading(false), 2000);
+  },
+
   sendAnswer: (data) => {
     const s = get();
 
@@ -161,6 +161,25 @@ const useGameStore = create((set, get) => ({
       s.setLoading(true, "Was Your Answer Correct?");
     }
   },
+
+  finishQuestion: (players, correctAnswer, results) => {
+    console.log("finish Question")
+    set({ answered: false });
+    setTimeout(() => {
+      set({
+        state: 2,
+        players: players,
+        latestAnswer: correctAnswer,
+        latestResults: results,
+      });
+
+      get().setLoading(false);
+      get().setProgressTimer(6.5 * 1000);
+    }, 500);
+  },
+
+  // Help Functions
+
   setLoading: (state, text) => {
     if (state) {
       set({
@@ -172,6 +191,18 @@ const useGameStore = create((set, get) => ({
         loading: false,
       });
     }
+  },
+  setProgressTimer: (ms) => {
+    set({
+      progressTimer: ms,
+      progressTimerEnd: Date.now() + ms,
+    });
+  },
+  clearProgressTimer: () => {
+    set({
+      progressTimer: null,
+      progressTimerEnd: null,
+    });
   }
 }));
 

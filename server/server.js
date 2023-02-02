@@ -15,24 +15,32 @@ export const io = new Server(shConfig.server.port, {
 });
 
 io.on("connection", (socket) => {
-  const { joinType, nickName, joinCode } = socket.handshake.query;
-  if (!nickName || nickName < 3) {
+  const { joinType, nickname, joinCode, questions } = socket.handshake.query;
+  if (!nickname || nickname < 3) {
     socket.emit("disconnectReason", "Invalid Nickname");
     socket.disconnect();
     return;
-  }
+  };
 
   if (joinType === "create") {
+    const maxQuestions = parseInt(questions);
+    if (!maxQuestions || typeof(maxQuestions) != "number" || maxQuestions > 20 || maxQuestions < 1) {
+      socket.emit("disconnectReason", "Invalid Number of Questions");
+      socket.disconnect();
+      return;
+    };
+
     const gameCode = generateGameCode();
 
     const game = {
       state: 0,
       code: gameCode,
       players: [
-        { id: socket.id, name: nickName, creator: true, score: 0 },
+        { id: socket.id, name: nickname, creator: true, score: 0 },
       ],
       questions: [],
       currentQuestion: -1,
+      maxQuestion: maxQuestions - 1,
       answers: [],
     }
 
@@ -54,7 +62,7 @@ io.on("connection", (socket) => {
   } else if (joinType === "join" && joinCode) {
     const game = gameLobbies[joinCode];
     if (game) {
-      if (game.players.find(p => p.name.toLowerCase() === nickName.toLowerCase())) {
+      if (game.players.find(p => p.name.toLowerCase() === nickname.toLowerCase())) {
         socket.emit("disconnectReason", "That Nickname is Taken");
         socket.disconnect();
         return;
@@ -62,7 +70,7 @@ io.on("connection", (socket) => {
 
       game.players.push({
         id: socket.id,
-        name: socket.handshake.query.nickName,
+        name: socket.handshake.query.nickname,
         creator: false,
         score: 0,
       });
@@ -78,7 +86,7 @@ io.on("connection", (socket) => {
       socket.disconnect();
       return;
     }
-  }
+  };
 
   socket.on("giveAnswer", (answer) => {
     const game = gameLobbies[socket.data.gameCode];
@@ -146,7 +154,7 @@ const isGameRoundComplete = (gameId) => {
     if (connectedPlayers.every(playerId => answeredPlayers.includes(playerId))) {
       game.state = 3;
       // Order player IDs in the time taken to answer
-      const answerOrder = [...answeredPlayers].sort((a, b) => game.answers[game.currentQuestion][a].timeTaken - game.answers[game.currentQuestion][b].timeTaken);
+      const answerOrder = [...answeredPlayers].filter(a => game.answers[game.currentQuestion][a].correct).sort((a, b) => game.answers[game.currentQuestion][a].timeTaken - game.answers[game.currentQuestion][b].timeTaken);
 
       console.log("everyone has answered, order: ", answerOrder)
       // Now the scores can be calculated as everyones time can be considered
@@ -161,11 +169,14 @@ const isGameRoundComplete = (gameId) => {
       });
 
       console.log(game.players);
-
       io.to(game.code).emit("finishQuestion", game.players, question.displayedAnswer, game.answers[game.currentQuestion]);
       setTimeout(() => {
-        playQuestion(game.code);
-      }, 20 * 1000);
+        if (game.currentQuestion >= game.maxQuestion) {
+          console.log("GAME HAS COMPLETE");
+        } else {
+          playQuestion(game.code);
+        };
+      }, 7 * 1000);
     };
   };
 };
@@ -180,6 +191,10 @@ const isGameRoundComplete = (gameId) => {
 
 //   obj.objects.ne_50m_admin_0_countries.geometries = obj.objects.ne_50m_admin_0_countries?.geometries.map(e => {
 //     //console.log(e)
+
+//     if (e.properties.LABELRANK >= 5) {
+//       console.log(e.properties.NAME)
+//     }
 
 //     return {
 //       ...e,
@@ -211,11 +226,12 @@ const isGameRoundComplete = (gameId) => {
 //         ISO_N3: e.properties.ISO_N3,
 //         FCLASS_ISO: e.properties.FCLASS_ISO,
 //         FCLASS_TLC: e.properties.FCLASS_TLC,
+//         LABELRANK: e.properties.LABELRANK,
 //       }
 //     }
 //   })
 
-//   console.log(obj.objects.ne_50m_admin_0_countries.geometries)
+//   //console.log(obj.objects.ne_50m_admin_0_countries.geometries)
 
   
 

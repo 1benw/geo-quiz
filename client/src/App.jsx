@@ -1,11 +1,11 @@
 import { useState, lazy } from 'react'
 import { createStyles, Loader, LoadingOverlay, Text, Stack, Transition } from '@mantine/core';
 
-import { StartMenu, WaitingScreen, Question, RoundResults } from './components';
+import { StartMenu, WaitingScreen, Question, RoundResults, ProgressTimer } from './components';
 
 import { useGameStore } from './hooks';
 
-import WorldTopo from '../../topojson/countries.json';
+// import WorldTopo from '../../topojson/countries.json';
 
 const useStyles = createStyles((theme) => ({
   resultOverlay: {
@@ -30,8 +30,6 @@ function App() {
   const currentQuestion = useGameStore(state => state.currentQuestion);
   const questionData = useGameStore(state => state.questionData);
 
-  console.log(WorldTopo)
-
   // Get the correct game component to display for the current game state
   const getGameComponent = () => {
     switch(gameState) {
@@ -48,6 +46,7 @@ function App() {
 
   return (
     <>
+      <ProgressTimer />
       <LoadingOverlay
         loader={
           <Stack style={{ width: '50vw' }}>
@@ -68,11 +67,6 @@ function App() {
           <RoundResults />
         </div>}
       </Transition>
-      {/* {(inGame && gameState == 2) && (
-        <div className={classes.resultOverlay}>
-          <RoundResults />
-        </div>
-      )} */}
     </>
   )
 }
