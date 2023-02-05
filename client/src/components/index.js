@@ -4,6 +4,7 @@ import WorldMap from './Maps/World';
 import Question from './Question';
 import RoundResults from "./RoundResults";
 import ProgressTimer from "./ProgressTimer";
+import EndResults from './EndResults';
 
 export {
   StartMenu,
@@ -12,4 +13,5 @@ export {
   Question,
   RoundResults,
   ProgressTimer,
+  EndResults,
 };

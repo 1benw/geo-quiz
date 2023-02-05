@@ -25,17 +25,19 @@ export default function ({ highlightCountry, onSelect = null }) {
   const { classes } = useStyles();
   const answered = useGameStore(state => state.answered);
   const [state, setState] = useState({
-    zoom: 30,
-    center: [0, 0]
+    zoom: 4,
+    center: [0, 40]
   });
   
   useEffect(() => {
-    const countryProperties = CountryTopos.find(c => c.properties.ADM0_A3_GB === highlightCountry)?.properties;
-    //console.log(countryProperties?.LABELRANK)
-    setState({
-      zoom: countryProperties?.LABELRANK >= 6 ? 40 : 6,
-      center: countryProperties ? [countryProperties.LABEL_X, countryProperties.LABEL_Y] : [0, 0],
-    });
+    if (highlightCountry) {
+      const countryProperties = CountryTopos.find(c => c.properties.ADM0_A3_GB === highlightCountry)?.properties;
+      //console.log(countryProperties?.LABELRANK)
+      setState({
+        zoom: countryProperties?.LABELRANK >= 6 ? 40 : 6,
+        center: countryProperties ? [countryProperties.LABEL_X, countryProperties.LABEL_Y] : [0, 0],
+      });
+    }
   }, [highlightCountry, answered]);
 
   return (
@@ -50,16 +52,16 @@ export default function ({ highlightCountry, onSelect = null }) {
           // scale: 400
         }}
       >
-        <ZoomableGroup center={state.center} maxZoom={30} minZoom={4} zoom={state.zoom}>
+        <ZoomableGroup center={state.center} maxZoom={100} minZoom={4} zoom={state.zoom}>
           <Geographies geography={WorldTopo}>
             {({ geographies }) =>
               geographies.map((geo) => {
-                if (geo.properties.ADM0_A3_GB != "ATA") {
+                if (geo.properties.ADM0_A3_GB != "ATA") { // Don't Render Antartica
                   return (
                     <Geography
-                      key={geo.rsmKey}
+                      key={geo.properties.NAME}
                       geography={geo}
-                      strokeWidth={0.1}
+                      strokeWidth={0.05}
                       style={{
                         default: {
                           fill: (highlightCountry && geo.properties.ADM0_A3_GB === highlightCountry) ? theme.colors.blue[8] : "#9998A3",
@@ -76,6 +78,8 @@ export default function ({ highlightCountry, onSelect = null }) {
                           outline: "none"
                         },
                         pressed: {
+                          fill: (highlightCountry && geo.properties.ADM0_A3_GB === highlightCountry) ? theme.colors.blue[8] : "#9998A3",
+                          stroke: (highlightCountry && geo.properties.ADM0_A3_GB === highlightCountry) ? theme.colors.blue[8] : "#EAEAEC",
                           outline: "none"
                         }
                       }}

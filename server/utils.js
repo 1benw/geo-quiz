@@ -1,5 +1,6 @@
 const charSet = `ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`;
 
+// The `getRandomString` function is not written by me
 export const getRandomString = (length, charSetOverride) => {
   let chars = charSetOverride;
   if (!chars) {
@@ -18,6 +19,8 @@ let generatedGameCodes = {};
 
 export const generateGameCode = () => {
   let code = getRandomString(6);
+
+  // If the Game code has been generated (and therefore possibly already an active game) then keep generating a new one until it isn't taken
   while (generatedGameCodes[code]) {
     code = getRandomString(6);
   };

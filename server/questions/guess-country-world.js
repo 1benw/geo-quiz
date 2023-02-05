@@ -1,8 +1,7 @@
 import topoJson from '../../topojson/ne_50m_admin_0_countries2.json' assert {type: 'json'};
-
-const validTypes = ['Sovereign country', 'Country', 'Sovereignty']; // Filter out dependencies
-const nameProperties = ['NAME', 'NAME_LONG', 'NAME_EN', 'NAME_SORT', 'FORMAL_EN'] // The names to compare answers against
-const countries = topoJson.objects?.ne_50m_admin_0_countries?.geometries.filter(c => validTypes.some(t => t === c.properties.TYPE));
+const nameProperties = ['NAME', 'NAME_LONG', 'NAME_EN', 'NAME_SORT', 'FORMAL_EN']; // The names to compare answers against
+// Filter to countries that are fully recognized and exclude dependencies etc
+const countries = topoJson.objects?.ne_50m_admin_0_countries?.geometries.filter(c => c.properties.FCLASS_ISO === "Admin-0 country");
 
 const doesAnswerMatch = (a, s) => {
   // Replace St. and St with Saint so that even the abbrevation matches certain countries
@@ -14,33 +13,35 @@ const doesAnswerMatch = (a, s) => {
 }
 
 const GuessCountryWorld = {
-  id: 'guess-country-world',
+  id: 'GuessCountryWorld',
   type: 'guess-country',
   name: 'Guess the Country (World)',
   region: 'world',
   get() {
     const randomCountry = countries[Math.floor(Math.random() * countries.length)];
-    console.log(randomCountry.properties.NAME_EN)
 
     return {
       time: Date.now(),
+      id: this.id,
       type: this.type,
       question: `Name the Highlighted Country`,
       data: {
         id: randomCountry.properties.ADM0_A3_GB,
       },
-      displayedAnswer: randomCountry.properties.NAME_EN,
+      displayedAnswer: `The Correct Answer Was: ${randomCountry.properties.NAME_EN}`,
     }
   },
   checkAnswer(questionData, answer) {
     const countryData = countries.find(c => c.properties.ADM0_A3_GB === questionData.id);
     if (countryData) {
+      // Check if the answer matches any of the possible known names for a country (long name, formal name, etc)
       for (const prop of nameProperties) {
         if (countryData.properties[prop].length > 0 && doesAnswerMatch(answer, countryData.properties[prop])) {
           return true;
         }
       }
 
+      // Check if the answer matches any of the country codes too (e.g France === FRA)
       if (answer === countryData.properties.ADM0_A3_GB || answer === countryData.properties.ISO_A2_EH) {
         return true;
       }

@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { createStyles, TextInput, Title, Button, Grid, Stack, NumberInput } from '@mantine/core';
+import { createStyles, TextInput, Title, Button, Grid, Stack, NumberInput, MultiSelect } from '@mantine/core';
 import Earth from '../assets/earth.svg';
 
 import { useGameStore } from '../hooks';
+import { useEffect } from 'react';
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -25,33 +26,67 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
+const availableQuestionTypes = [
+  { value: 'GuessCountryWorld', label: 'Guess the Country - World' },
+  { value: 'FindCountryWorld', label: 'Find the Country - World' },
+];
+
+const defaultQuestionTypes = [
+  "GuessCountryWorld"
+];
+
 export default function () {
   const { classes } = useStyles();
   const [menuState, setMenuState] = useState(false);
-  const [nickname, setNickname] = useState('');
-  const [gamePin, setGamePin] = useState('');
-  const [numQuestions, setNumQuestions] = useState(5);
-  const connect = useGameStore(state => state.connect);
+  const [options, setOptions] = useState({});
+  const [questionTypeErr, setQuestionTypeErr] = useState(null);
 
-  const startGame = () => {
-    connect(true, {
-      nickname, 
-      questions: numQuestions,
+  const changeMenu = (state) => {
+    if (state === 'start') {
+      setOptions({
+        nickname: '',
+        numQuestions: 5,
+        questionTypes: [...defaultQuestionTypes],
+      });
+    } else if (state === 'join') {
+      setOptions({
+        nickname: '',
+        gamePin: '',
+      });
+    } else {
+      setOptions({});
+    }
+
+    setMenuState(state);
+  };
+
+  const changeOption = (option, val) => {
+    setOptions({
+      ...options,
+      [option]: val,
     });
-    setMenuState(false);
-    setNickname('');
+  };
+
+  const connect = useGameStore(state => state.connect);
+  const startGame = () => {
+    connect(true, options);
+
+    changeMenu(false);
   };
 
   const joinGame = () => {
-    connect(false, {
-      nickname,
-      gamePin: gamePin,
-      questions: numQuestions,
-    });
-    setMenuState(false);
-    setNickname('');
-    setGamePin('');
+    connect(false, options);
+
+    changeMenu(false);
   };
+
+  useEffect(() => {
+    if (options?.questionTypes?.length <= 0) {
+      setQuestionTypeErr(true);
+    } else {
+      setQuestionTypeErr(null);
+    }
+  }, [options]);
 
   return (
     <Stack justify="space-between" className={classes.container}>
@@ -66,20 +101,32 @@ export default function () {
               <TextInput
                 placeholder="Bob"
                 label="Nickname"
-                value={nickname}
-                onChange={e => setNickname(e.currentTarget.value)}
+                value={options.nickname}
+                onChange={e => changeOption('nickname', e.currentTarget.value)}
                 maxLength={20}
               />
             </Grid.Col>
             <Grid.Col span={12}>
               <NumberInput
                 label="Number of Questions"
-                value={numQuestions}
-                onChange={num => setNumQuestions(parseInt(num))}
+                value={options.numQuestions}
+                onChange={num => changeOption('numQuestions', parseInt(num))}
+                min={5}
+                max={30}
+              />
+            </Grid.Col>
+            <Grid.Col span={12}>
+              <MultiSelect
+                label="Question Types"
+                data={availableQuestionTypes}
+                value={options.questionTypes}
+                description="What types of question would you like to be included?"
+                onChange={val => changeOption('questionTypes', val)}
+                error={questionTypeErr}
               />
             </Grid.Col>
             <Grid.Col span={6}>
-              <Button className={classes.button} fullWidth color="dark" onClick={() => setMenuState(false)}>Go Back</Button>
+              <Button className={classes.button} fullWidth color="dark" onClick={() => changeMenu(false)}>Go Back</Button>
             </Grid.Col>
             <Grid.Col span={6}>
               <Button className={classes.button} fullWidth color="green" onClick={startGame}>New Game</Button>
@@ -93,8 +140,8 @@ export default function () {
               <TextInput
                 placeholder="Game Pin"
                 label="Game Pin"
-                value={gamePin}
-                onChange={e => setGamePin(e.currentTarget.value.toUpperCase())}
+                value={options.gamePin}
+                onChange={e => changeOption('gamePin', e.currentTarget.value.toUpperCase())}
                 maxLength={6}
               />
             </Grid.Col>
@@ -102,8 +149,8 @@ export default function () {
               <TextInput
                 placeholder="Bob"
                 label="Nickname"
-                value={nickname}
-                onChange={e => setNickname(e.currentTarget.value)}
+                value={options.nickname}
+                onChange={e => changeOption('nickname', e.currentTarget.value)}
                 maxLength={20}
               />
             </Grid.Col>
@@ -119,10 +166,10 @@ export default function () {
           <div className={classes.actions}>
             <Grid>
               <Grid.Col span={6}>
-                <Button className={classes.button} fullWidth color="green" onClick={() => setMenuState('start')}>New Game</Button>
+                <Button className={classes.button} fullWidth color="green" onClick={() => changeMenu('start')}>New Game</Button>
               </Grid.Col>
               <Grid.Col span={6}>
-                <Button className={classes.button} fullWidth onClick={() => setMenuState('join')}>Join Game</Button>
+                <Button className={classes.button} fullWidth onClick={() => changeMenu('join')}>Join Game</Button>
               </Grid.Col>
             </Grid>
           </div>

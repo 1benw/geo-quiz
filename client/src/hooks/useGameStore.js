@@ -25,49 +25,43 @@ const initialState = {
 const useGameStore = create((set, get) => ({
   ...initialState,
   // connected: true,
-  // state: 2,
+  // state: 1,
+  // playerId: 1,
+  // currentQuestion: 1,
+  // questionData: {
+  //   type: "find-country",
+  //   question: "Select",
+  //   data: {
+  //     id: "FRA",
+  //   }
+  // },
   // players: [
   //   { id: 1, name: "bob", score: 7 },
-  //   { id: 1, name: "bob", score: 7 },
-  //   { id: 1, name: "bob", score: 7 },
-  //   { id: 1, name: "bob", score: 7 },
-  //   { id: 1, name: "bob", score: 7 },
-  //   { id: 1, name: "bob", score: 7 },
-  //   { id: 1, name: "bob", score: 7 },
-  //   { id: 1, name: "bob", score: 7 },
-  //   { id: 1, name: "bob", score: 7 },
-  //   { id: 1, name: "bob", score: 7 },
-  //   { id: 1, name: "bob", score: 7 },
-  //   { id: 2, name: "bob", score: 7 },
+  //   // { id: 2, name: "Dave", score: 7 },
+  //   // { id: 3, name: "Dan", score: 7 },
+  //   // { id: 3, name: "bob", score: 7 },
+  //   // { id: 3, name: "bob", score: 7 },
+  //   // { id: 3, name: "bob", score: 7 },
+  //   // { id: 3, name: "bob", score: 7 },
+  //   // { id: 3, name: "bob", score: 7 },
+  //   // { id: 3, name: "bob", score: 7 },
+  //   // { id: 3, name: "bob", score: 7 },
+  //   // { id: 3, name: "bob", score: 7 },
+  //   // { id: 2, name: "bob", score: 7 },
   // ],
-  // latestResults: {
-  //   1: { score: 1 },
-  //   2: { score: 0 },
-  // },
   connect: (newGame, data) => {
     const query = {
       joinType: newGame ? "create" : "join",
+      ...data,
     };
 
-    if (data.nickname) {
-      query.nickname = data.nickname;
-    };
-
-    if (data.questions) {
-      query.questions = data.questions;
-    };
-
-    if (data.gamePin) {
-      query.joinCode = data.gamePin;
-    };
-
-    // const socket = io(`http://${window.location.hostname}:${shConfig.server.port}`, {
-    //   query,
-    // });
-
-    const socket = io(`https://3000-1benw-geoquiz-dtsncpcfjas.ws-eu85.gitpod.io`, {
+    const socket = io(`http://${window.location.hostname}:${shConfig.server.port}`, {
       query,
     });
+
+    // const socket = io(`https://3000-1benw-geoquiz-dtsncpcfjas.ws-eu85.gitpod.io`, {
+    //   query,
+    // });
 
     set({
       socket: socket,
@@ -78,41 +72,43 @@ const useGameStore = create((set, get) => ({
       console.log("Connected to Server");
       set({ connected: true, playerId: socket.id });
     }).on("disconnect", (reason) => {
-      console.log("Disconnected from Server");
-      set({
-        ...initialState,
-      });
-
-      switch (reason) {
-        case "io server disconnect": // Server was Manually Disconnected
-          const disconnectReason = get().disconnectReason;
-          if (disconnectReason) {
+      if (get().state !== 3) {
+        set({
+          ...initialState,
+        });
+  
+        switch (reason) {
+          case "io server disconnect": // Server was Manually Disconnected
+            const disconnectReason = get().disconnectReason;
+            if (disconnectReason) {
+              showNotification({
+                color: "red",
+                title: "Error",
+                message: disconnectReason,
+                disallowClose: true,
+              });
+              break;
+            }
+          case "ping timeout":
+          case "transport close":
             showNotification({
               color: "red",
               title: "Error",
-              message: disconnectReason,
+              message: "Connection Lost",
               disallowClose: true,
             });
             break;
-          }
-        case "ping timeout":
-        case "transport close":
-          showNotification({
-            color: "red",
-            title: "Error",
-            message: "Connection Lost",
-            disallowClose: true,
-          });
-          break;
-        default:
-          showNotification({
-            color: "red",
-            title: "Error",
-            disallowClose: true,
-          });
-          break;
-      };
+          default:
+            showNotification({
+              color: "red",
+              title: "Error",
+              disallowClose: true,
+            });
+            break;
+        };
+      }
 
+      console.log("Disconnected from Server");
       socket.disconnect();
     }).on("disconnectReason", (reason) => {
       set({ disconnectReason: reason });
@@ -130,6 +126,8 @@ const useGameStore = create((set, get) => ({
       get().startQuestion(question, data);
     }).on("finishQuestion", (players, correctAnswer, results) => {
       get().finishQuestion(players, correctAnswer, results);
+    }).on("finishGame", (players) => {
+      get().finishGame(players);
     });
   },
   start: () => {
@@ -149,7 +147,7 @@ const useGameStore = create((set, get) => ({
       state: 1,
     });
 
-    setTimeout(() => get().setLoading(false), 2000);
+    setTimeout(() => get().setLoading(false), 1500);
   },
 
   sendAnswer: (data) => {
@@ -163,7 +161,6 @@ const useGameStore = create((set, get) => ({
   },
 
   finishQuestion: (players, correctAnswer, results) => {
-    console.log("finish Question")
     set({ answered: false });
     setTimeout(() => {
       set({
@@ -176,6 +173,22 @@ const useGameStore = create((set, get) => ({
       get().setLoading(false);
       get().setProgressTimer(6.5 * 1000);
     }, 500);
+  },
+
+  leaveGame: () => {
+    const socket = get().socket;
+    if (socket && socket.connected) {
+      socket.disconnect();
+    };
+
+    set({ ... initialState });
+  },
+  
+  finishGame: (players) => {
+    set({
+      state: 3,
+      players: players,
+    });
   },
 
   // Help Functions

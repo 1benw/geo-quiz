@@ -22,13 +22,10 @@ const useStyles = createStyles((theme) => ({
 
 export default function ({ question, description, country, onSubmitAnswer }) {
   const { classes } = useStyles();
-  const focusTrapRef = useFocusTrap();
-  const [answer, setAnswer] = useState('');
   const gameState = useGameStore(state => state.state);
 
-  const onInternalSubmit = () => {
-    onSubmitAnswer(answer);
-    setAnswer('');
+  const onInternalSubmit = (selected) => {
+    onSubmitAnswer(selected);
   };
 
   return (
@@ -54,32 +51,7 @@ export default function ({ question, description, country, onSubmitAnswer }) {
           </Card>}
         </Transition>
       </Center>
-      <Center style={{ width: '100%' }}>
-        <Transition mounted={gameState !== 2} transition="slide-up" duration={500} timingFunction="ease">
-          {(styles) => <Card
-            className={classes.inputCard}
-            shadow="sm"
-            p="md"
-            style={styles}
-            ref={focusTrapRef}
-          >
-            <TextInput
-              placeholder="Answer"
-              value={answer}
-              onChange={e => setAnswer(e.currentTarget.value)}
-              data-autofocus
-              autoComplete="off"
-              onKeyDown={e => {
-                if (e.key === "Enter") {
-                  onInternalSubmit();
-                }
-              }}
-            />
-            <Button fullWidth mt="sm" onClick={onInternalSubmit}>Submit</Button>
-          </Card>}
-        </Transition>
-      </Center>
-      <WorldMap highlightCountry={country} />
+      <WorldMap highlightCountry={gameState === 2 ? country : null} onSelect={gameState === 1 ? onInternalSubmit : null} />
     </div>
   )
 };

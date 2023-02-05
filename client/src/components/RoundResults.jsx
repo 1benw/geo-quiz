@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useState } from 'react';
 import { createStyles, Text, Title, Button, Grid, Stack, Loader, Divider, Space } from '@mantine/core';
 
 import { useGameStore } from '../hooks';
 
 const useStyles = createStyles((theme) => ({
   container: {
-    height: '90%',
+    height: '95%',
     width: '100%',
   },
   quiz: {
@@ -46,7 +46,7 @@ export default function () {
                 <Title align="center" order={1}>Your Answer Was <Text span color="red" weight={700}>Incorrect</Text>  😢</Title>
             </>
         )}
-        <Title align="center" order={2}>The Correct Answer Was: <Text span weight={700}>{answer}</Text></Title>
+        <Title align="center" order={2}>{answer}</Title>
       </Stack>
       <Divider my="md" size="sm" />
       <div className={classes.playerList}>

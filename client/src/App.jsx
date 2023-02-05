@@ -1,7 +1,7 @@
 import { useState, lazy } from 'react'
 import { createStyles, Loader, LoadingOverlay, Text, Stack, Transition } from '@mantine/core';
 
-import { StartMenu, WaitingScreen, Question, RoundResults, ProgressTimer } from './components';
+import { StartMenu, WaitingScreen, Question, RoundResults, ProgressTimer, EndResults } from './components';
 
 import { useGameStore } from './hooks';
 
@@ -41,6 +41,8 @@ function App() {
           questionNum={currentQuestion}
           questionData={questionData}
         />;
+      case 3:
+        return <EndResults />;
     }
   }
 
@@ -64,7 +66,7 @@ function App() {
       {inGame && getGameComponent()}
       <Transition mounted={inGame && gameState == 2} transition="fade" duration={400} timingFunction="ease">
         {(styles) => <div className={classes.resultOverlay} style={styles}>
-          <RoundResults />
+          {gameState == 2 && <RoundResults />}
         </div>}
       </Transition>
     </>
