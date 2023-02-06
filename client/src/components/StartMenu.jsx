@@ -29,6 +29,8 @@ const useStyles = createStyles((theme) => ({
 const availableQuestionTypes = [
   { value: 'GuessCountryWorld', label: 'Guess the Country - World' },
   { value: 'FindCountryWorld', label: 'Find the Country - World' },
+  { value: 'GuessStateUSA', label: 'Guess the State (USA)' },
+  { value: 'FindStateUSA', label: 'Find the State (USA)' },
 ];
 
 const defaultQuestionTypes = [
