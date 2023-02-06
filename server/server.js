@@ -211,7 +211,7 @@ const isGameRoundComplete = (gameId) => {
       setTimeout(() => {
         if (game.currentQuestion >= game.maxQuestion) {
           console.log("GAME HAS COMPLETE");
-          io.to(game.code).emit("finishGame", game.players.sort((a, b) => a.score - b.score));
+          io.to(game.code).emit("finishGame", game.players.sort((a, b) => b.score - a.score));
           io.to(game.code).disconnectSockets();
         } else {
           playQuestion(game.code);
