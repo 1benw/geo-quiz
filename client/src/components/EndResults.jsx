@@ -111,15 +111,15 @@ export default function () {
       </Stack>
       <Divider my="md" size="sm" />
       <Grid className={classes.podiumsContainer}>
-        {players[1] && <Grid.Col span={4}>
+        <Grid.Col span={4}>
           <Podium position={2} name={players[1]?.name} />
-        </Grid.Col>}
+        </Grid.Col>
         <Grid.Col span={4}>
           <Podium position={1} name={players[0]?.name} />
         </Grid.Col>
-        {players[1] && <Grid.Col span={4}>
+        <Grid.Col span={4}>
           <Podium position={3} name={players[2]?.name} />
-        </Grid.Col>}
+        </Grid.Col>
       </Grid>
       <Divider my="md" size="sm" />
       <div className={classes.playerList}>

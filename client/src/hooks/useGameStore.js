@@ -55,13 +55,13 @@ const useGameStore = create((set, get) => ({
       ...data,
     };
 
-    const socket = io(`http://${window.location.hostname}:${shConfig.server.port}`, {
-      query,
-    });
-
-    // const socket = io(`https://3000-1benw-geoquiz-dtsncpcfjas.ws-eu85.gitpod.io`, {
+    // const socket = io(`http://${window.location.hostname}:${shConfig.server.port}`, {
     //   query,
     // });
+
+    const socket = io(`https://3000-1benw-geoquiz-dtsncpcfjas.ws-eu85.gitpod.io`, {
+      query,
+    });
 
     set({
       socket: socket,

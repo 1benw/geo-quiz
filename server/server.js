@@ -113,6 +113,10 @@ io.on("connection", (socket) => {
     socket.join(joinCode);
     socket.emit("ready", false, joinCode, game);
     socket.to(joinCode).emit("updatePlayers", game.players, socket.id);
+  } else {
+    socket.emit("disconnectReason", "Game Does Not Exist");
+    socket.disconnect();
+    return;
   };
 
   socket.on("giveAnswer", (answer) => {

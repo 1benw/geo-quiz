@@ -37,6 +37,11 @@ export default function ({ highlightCountry, onSelect = null }) {
         zoom: countryProperties?.LABELRANK >= 6 ? 40 : 6,
         center: countryProperties ? [countryProperties.LABEL_X, countryProperties.LABEL_Y] : [0, 0],
       });
+    } else {
+      setState({
+        zoom: 4,
+        center: [0, 40]
+      });
     }
   }, [highlightCountry, answered]);
 

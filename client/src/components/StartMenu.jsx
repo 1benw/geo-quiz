@@ -51,7 +51,7 @@ export default function () {
     } else if (state === 'join') {
       setOptions({
         nickname: '',
-        gamePin: '',
+        joinCode: '',
       });
     } else {
       setOptions({});
@@ -140,8 +140,8 @@ export default function () {
               <TextInput
                 placeholder="Game Pin"
                 label="Game Pin"
-                value={options.gamePin}
-                onChange={e => changeOption('gamePin', e.currentTarget.value.toUpperCase())}
+                value={options.joinCode}
+                onChange={e => changeOption('joinCode', e.currentTarget.value.toUpperCase())}
                 maxLength={6}
               />
             </Grid.Col>
