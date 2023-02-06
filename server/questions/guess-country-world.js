@@ -1,4 +1,4 @@
-import topoJson from '../../topojson/ne_50m_admin_0_countries2.json' assert {type: 'json'};
+import topoJson from '../../topojson/ne_50m_admin_0_countries_shortened.json' assert {type: 'json'};
 const nameProperties = ['NAME', 'NAME_LONG', 'NAME_EN', 'NAME_SORT', 'FORMAL_EN']; // The names to compare answers against
 // Filter to countries that are fully recognized and exclude dependencies etc
 const countries = topoJson.objects?.ne_50m_admin_0_countries?.geometries.filter(c => c.properties.FCLASS_ISO === "Admin-0 country");

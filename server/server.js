@@ -8,7 +8,7 @@ import { QuestionTypes, checkAnswer, getQuestion } from './questions/question.js
 const gameLobbies = {};
 
 // Create a new WebSocket
-export const io = new Server(shConfig.server.port, {
+export const io = new Server(shConfig.port, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"]

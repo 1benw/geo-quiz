@@ -29,7 +29,7 @@ const useGameStore = create((set, get) => ({
   // playerId: 1,
   // currentQuestion: 1,
   // questionData: {
-  //   type: "find-country",
+  //   type: "guess-country",
   //   question: "Select",
   //   data: {
   //     id: "FRA",

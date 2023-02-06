@@ -1,4 +1,4 @@
-import topoJson from '../../topojson/ne_50m_admin_0_countries2.json' assert {type: 'json'};
+import topoJson from '../../topojson/ne_50m_admin_0_countries_shortened.json' assert {type: 'json'};
 
 // Filter to countries that are fully recognized and exclude dependencies etc
 // Also Exclude Vatican City (VAT) because it is too small to select properly
