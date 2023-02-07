@@ -17,8 +17,13 @@ const GuessCountryWorld = {
   type: 'guess-country',
   name: 'Guess the Country (World)',
   region: 'world',
-  get() {
-    const randomCountry = countries[Math.floor(Math.random() * countries.length)];
+  get(playedQuestions) {
+    const playedQuestionsOfType = playedQuestions.filter(q => q.id === this.id);
+
+    let randomCountry = countries[Math.floor(Math.random() * countries.length)];
+    while (playedQuestionsOfType.find(q => q.data.id === randomCountry.properties.ADM0_A3_GB)) {
+      randomCountry = countries[Math.floor(Math.random() * countries.length)];
+    };
 
     return {
       time: Date.now(),

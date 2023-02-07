@@ -6,13 +6,13 @@ const useStyles = createStyles((theme) => ({
   progressBar: {
     position: 'fixed',
     top: 0,
-    height: 10,
+    height: 12,
     width: '100%',
     zIndex: 10000,
   },
   bar: {
     transition: 'width .5s linear',
-    backgroundColor: theme.colors.grape,
+    backgroundColor: theme.colors.blue[8],
   }
 }));
 

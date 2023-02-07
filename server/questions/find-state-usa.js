@@ -8,8 +8,13 @@ const FindStateUSA = {
   type: 'find-united-states',
   name: 'Find the State (USA)',
   region: 'usa',
-  get() {
-    const randomState = states[Math.floor(Math.random() * states.length)];
+  get(playedQuestions) {
+    const playedQuestionsOfType = playedQuestions.filter(q => q.id === this.id);
+
+    let randomState = states[Math.floor(Math.random() * states.length)];
+    while (playedQuestionsOfType.find(q => q.data.id === randomState.properties.postal)) {
+      randomState = states[Math.floor(Math.random() * states.length)];
+    };
 
     return {
       time: Date.now(),

@@ -13,11 +13,11 @@ const Questions = {
 
 export const QuestionTypes = Object.keys(Questions);
 
-export const getQuestion = (possibleTypes) => {
+export const getQuestion = (possibleTypes, playedQuestions) => {
   // Randomly choose a question from the selected possibilities by the game creator
   const randomType = possibleTypes[Math.floor(Math.random() * possibleTypes.length)];
 
-  return Questions[randomType].get();
+  return Questions[randomType].get(playedQuestions);
 };
 
 export const checkAnswer = (type, questionData, answer) => {

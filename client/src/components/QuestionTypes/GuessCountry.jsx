@@ -12,7 +12,7 @@ const useStyles = createStyles((theme) => ({
   },
   infoCard: {
     position: 'fixed',
-    top: 10,
+    top: 20,
   },
   inputCard: {
     position: 'fixed',

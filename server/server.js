@@ -15,10 +15,13 @@ export const io = new Server(shConfig.port, {
   }
 });
 
+const QUESTION_TIMEOUT = 25000; // The time you need to answer the question in before it times out
+
+// On New WebSocket Connection From a Client
 io.on("connection", (socket) => {
   const { joinType, nickname, joinCode, numQuestions, questionTypes } = socket.handshake.query;
 
-  // Check if nickname is valid
+  // If no nickname or the nickname isn't 3 characters long, disconnect them
   if (!nickname || nickname < 3) {
     socket.emit("disconnectReason", "Invalid Nickname");
     socket.disconnect();
@@ -27,6 +30,7 @@ io.on("connection", (socket) => {
 
   if (joinType === "create") { // If Creating a New Game
     const maxQuestions = parseInt(numQuestions);
+    // If not a number or the amount of questions is over/below the limits, disconnect them
     if (isNaN(maxQuestions) || maxQuestions > 20 || maxQuestions < 1) {
       socket.emit("disconnectReason", "Invalid Number of Questions");
       socket.disconnect();
@@ -36,7 +40,8 @@ io.on("connection", (socket) => {
     // Turn back to an array as it gets converted to a string when passed over a URL
     const possibleQuestions = questionTypes?.split(',');
 
-    // Check if exists, check length is > 0, check if every element in the array is also in the QuestionTypes array
+    // Check if exists, check length is > 0 (need at least 1 type of question), 
+    // Check if every element in the array is also in the QuestionTypes array
     // Otherwise, throw an error and don't let them create the game
     if (!possibleQuestions || possibleQuestions.length <= 0 || !possibleQuestions.every(q => QuestionTypes.includes(q))) {
       socket.emit("disconnectReason", "Invalid Selection of Question Types");
@@ -61,17 +66,18 @@ io.on("connection", (socket) => {
     };
 
     socket.data.gameCode = gameCode;
+    // Send the generated game code and initial game data to the host client so they can share it
     socket.emit("ready", true, gameCode, game);
     socket.join(gameCode);
 
     gameLobbies[gameCode] = game;
 
-    console.log("Game Created", gameCode);
+    console.log(`Game ${gameCode} Created`);
 
     socket.on("startGame", () => {
       if (game.currentQuestion < 0) {
         // Change Game State so no new players can join.
-        console.log("Game Started", socket.data.gameCode);
+        console.log(`Game ${gameCode} Started`);
         gameLobbies[socket.data.gameCode].state = 1;
 
         // Generate & Send out 1st Question
@@ -81,18 +87,22 @@ io.on("connection", (socket) => {
   } else if (joinType === "join" && joinCode) { // If Joining an Existing Game
     const game = gameLobbies[joinCode];
 
+    // If no game found with game code, disconnect them and don't let them join
     if (!game) {
       socket.emit("disconnectReason", "Invalid Game Code");
       socket.disconnect();
       return;
     };
 
+    // If the game has already started, disconnect them and don't let them join
     if (game.state > 0) {
       socket.emit("disconnectReason", "Game Already Started");
       socket.disconnect();
       return;
     };
 
+    // If there is already someone in the game with the game nickname, don't let them join
+    // Compare lower case of both to ignore case differences
     if (game.players.find(p => p.name.toLowerCase() === nickname.toLowerCase())) {
       socket.emit("disconnectReason", "That Nickname is Taken");
       socket.disconnect();
@@ -107,11 +117,11 @@ io.on("connection", (socket) => {
       score: 0,
     });
 
-    console.log('Game Joined', socket.id);
-
     socket.data.gameCode = joinCode;
     socket.join(joinCode);
+    // Send the generated game code and initial game data so they can share it
     socket.emit("ready", false, joinCode, game);
+    // Update players for EVERYONE in the game
     socket.to(joinCode).emit("updatePlayers", game.players, socket.id);
   } else {
     socket.emit("disconnectReason", "Game Does Not Exist");
@@ -121,7 +131,8 @@ io.on("connection", (socket) => {
 
   socket.on("giveAnswer", (answer) => {
     const game = gameLobbies[socket.data.gameCode];
-    if (game && game.currentQuestion >= 0 && !game.answers[game.currentQuestion][socket.id]) {
+    // If the game is in the right state, and the player hasn't already send their answer for the round (or been timed out)
+    if (game && game.state === 2 && game.currentQuestion >= 0 && !game.answers[game.currentQuestion][socket.id]) {
       const question = game.questions[game.currentQuestion];
       const correct = checkAnswer(question.id, question.data, answer);
 
@@ -140,7 +151,6 @@ io.on("connection", (socket) => {
 io.of("/").adapter.on("leave-room", (room, id) => {
   const game = gameLobbies[room];
   if (game) {
-    console.log("Leaving Game", room, id);
     game.players = game.players.filter(p => p.id !== id);
 
     // If there are no players left, delete the room
@@ -160,19 +170,40 @@ const playQuestion = (gameCode) => {
   }
 
   // The new randomly generated Question
-  const newQuestion = getQuestion(game.possibleQuestions);
+  const newQuestion = getQuestion(game.possibleQuestions, game.questions);
+  const questionNum = game.currentQuestion + 1;
 
   game.state = 2;
-  game.currentQuestion++;
+  game.currentQuestion = questionNum;
   game.questions.push(newQuestion);
   game.answers.push({});
 
   console.log("New Question", game.currentQuestion, newQuestion);
 
+  // If the players have not answered by the time limit, end the round and don't give them any points!
+  setTimeout(() => {
+    if (game && game.state === 2 && game.currentQuestion === questionNum) {
+      // For Every Player
+      game.players.forEach(player => {
+        if (!game.answers[questionNum][player.id]) {
+          game.answers[questionNum][player.id] = {
+            correct: false,
+            answer: "",
+            timeTaken: QUESTION_TIMEOUT,
+            timeOut: true,
+          }
+        }
+      });
+
+      isGameRoundComplete(gameCode);
+    }
+  }, QUESTION_TIMEOUT);
+
   io.to(gameCode).emit(
     "startQuestion",
     game.currentQuestion,
     newQuestion,
+    QUESTION_TIMEOUT,
   );
 };
 
@@ -184,7 +215,7 @@ const isGameRoundComplete = (gameId) => {
     const answeredPlayers = Object.keys(game.answers[game.currentQuestion]);
     const connectedPlayers = game.players.map(p => p.id);
 
-    // If Every Player in Game Has Answered
+    // If Every Player in Game Has "Answered" or have been timed out
     if (connectedPlayers.every(playerId => answeredPlayers.includes(playerId))) {
       game.state = 3;
 
@@ -193,7 +224,6 @@ const isGameRoundComplete = (gameId) => {
         .filter(a => game.answers[game.currentQuestion][a].correct)
         .sort((a, b) => game.answers[game.currentQuestion][a].timeTaken - game.answers[game.currentQuestion][b].timeTaken);
 
-      console.log("everyone has answered, order: ", answerOrder)
       // Now the scores can be calculated as everyones time can be considered
       game.players = game.players.map(player => {
         const roundResults = game.answers[game.currentQuestion][player.id];
@@ -205,12 +235,11 @@ const isGameRoundComplete = (gameId) => {
         }
       });
 
-      console.log(game.players);
       io.to(game.code).emit("finishQuestion", game.players, question.displayedAnswer, game.answers[game.currentQuestion]);
 
       setTimeout(() => {
         if (game.currentQuestion >= game.maxQuestion) {
-          console.log("GAME HAS COMPLETE");
+          console.log(`Game ${game.code} Complete`);
           io.to(game.code).emit("finishGame", game.players.sort((a, b) => b.score - a.score));
           io.to(game.code).disconnectSockets();
         } else {

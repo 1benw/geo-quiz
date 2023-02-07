@@ -118,8 +118,8 @@ const useGameStore = create((set, get) => ({
     }).on("updatePlayers", (players) => {
       console.log("New Player Joined");
       set({ players: players });
-    }).on("startQuestion", (question, data) => {
-      get().startQuestion(question, data);
+    }).on("startQuestion", (question, data, timeout) => {
+      get().startQuestion(question, data, timeout);
     }).on("finishQuestion", (players, correctAnswer, results) => {
       get().finishQuestion(players, correctAnswer, results);
     }).on("finishGame", (players) => {
@@ -133,7 +133,7 @@ const useGameStore = create((set, get) => ({
     }
   },
 
-  startQuestion: (question, data) => {
+  startQuestion: (question, data, timeout) => {
     get().clearProgressTimer();
     get().setLoading(true, "Loading Next Question");
 
@@ -143,6 +143,7 @@ const useGameStore = create((set, get) => ({
       state: 1,
     });
 
+    get().setProgressTimer(timeout - 500);
     setTimeout(() => get().setLoading(false), 1500);
   },
 
@@ -153,6 +154,7 @@ const useGameStore = create((set, get) => ({
       s.socket.emit("giveAnswer", data);
       set({ answered: true });
       s.setLoading(true, "Was Your Answer Correct?");
+      s.clearProgressTimer();
     }
   },
 

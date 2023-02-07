@@ -32,6 +32,17 @@ export default function () {
 
   const myResults = results?.[playerId];
 
+  const getResultComponent = () => {
+    // They answered in time and was correct
+    if (myResults?.correct) {
+      return <Title align="center" order={1}>Your Answer Was <Text span color="blue" weight={700}>Correct</Text>!  🎉</Title>;
+    } else if (myResults?.timeOut) { // They did not answer in time
+      return <Title align="center" order={1}>You <Text span color="red" weight={700}>Ran Out of Time</Text>  ⏰</Title>;
+    } else { // They answered in time but were wrong
+      return <Title align="center" order={1}>Your Answer Was <Text span color="red" weight={700}>Incorrect</Text>  😢</Title>;
+    }
+  };
+
   return (
     <Stack justify="space-between" className={classes.container}>
       <div className={classes.quiz}>
@@ -39,13 +50,7 @@ export default function () {
       </div>
       <Stack>
         <Title align="center" order={2}>{question?.question}</Title>
-        {myResults?.correct ? (
-            <Title align="center" order={1}>Your Answer Was <Text span color="blue" weight={700}>Correct</Text>!  🎉</Title>
-        ) : (
-            <>
-                <Title align="center" order={1}>Your Answer Was <Text span color="red" weight={700}>Incorrect</Text>  😢</Title>
-            </>
-        )}
+        {getResultComponent()}
         <Title align="center" order={2}>{answer}</Title>
       </Stack>
       <Divider my="md" size="sm" />
@@ -71,7 +76,7 @@ export default function () {
                             {` - ${p.score} Points`}
                         </Text>
                         <Text size="xl" span color={pointsEarned > 0 ? "green" : "red"} weight={500}>
-                            {` (+${pointsEarned})`}
+                            {` (+${pointsEarned}${results[p.id].timeOut ? " - Timed Out" : ""})`}
                         </Text>
                     </Text>
                 </Grid.Col>
