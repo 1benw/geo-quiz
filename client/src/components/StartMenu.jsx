@@ -27,10 +27,10 @@ const useStyles = createStyles((theme) => ({
 }));
 
 const availableQuestionTypes = [
-  { value: 'GuessCountryWorld', label: 'Guess the Country - World' },
-  { value: 'FindCountryWorld', label: 'Find the Country - World' },
-  { value: 'GuessStateUSA', label: 'Guess the State (USA)' },
-  { value: 'FindStateUSA', label: 'Find the State (USA)' },
+  { value: 'GuessCountryWorld', label: 'Guess the Country (World)', group: 'World' },
+  { value: 'FindCountryWorld', label: 'Find the Country (World)', group: 'World' },
+  { value: 'GuessStateUSA', label: 'Guess the State (USA)', group: 'United States' },
+  { value: 'FindStateUSA', label: 'Find the State (USA)', group: 'United States' },
 ];
 
 const defaultQuestionTypes = [
@@ -125,6 +125,7 @@ export default function () {
                 description="What types of question would you like to be included?"
                 onChange={val => changeOption('questionTypes', val)}
                 error={questionTypeErr}
+                dropdownPosition="top"
               />
             </Grid.Col>
             <Grid.Col span={6}>

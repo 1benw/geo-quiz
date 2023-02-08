@@ -22,7 +22,7 @@ io.on("connection", (socket) => {
   const { joinType, nickname, joinCode, numQuestions, questionTypes } = socket.handshake.query;
 
   // If no nickname or the nickname isn't 3 characters long, disconnect them
-  if (!nickname || nickname < 3) {
+  if (!nickname || nickname.length < 3) {
     socket.emit("disconnectReason", "Invalid Nickname");
     socket.disconnect();
     return;
@@ -151,6 +151,7 @@ io.on("connection", (socket) => {
 io.of("/").adapter.on("leave-room", (room, id) => {
   const game = gameLobbies[room];
   if (game) {
+    // Remove the player who just left from the game
     game.players = game.players.filter(p => p.id !== id);
 
     // If there are no players left, delete the room

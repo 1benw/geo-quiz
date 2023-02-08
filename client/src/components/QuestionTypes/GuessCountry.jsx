@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { createStyles, useMantineTheme, Card, Text, Center, TextInput, Button, Transition } from '@mantine/core';
-import { useFocusTrap } from '@mantine/hooks';
+import { useFocusTrap, useMediaQuery } from '@mantine/hooks';
 
 import { WorldMap } from '..';
 import { useGameStore } from '../../hooks';
@@ -21,8 +21,9 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export default function ({ question, description, country, onSubmitAnswer }) {
-  const { classes } = useStyles();
-  const focusTrapRef = useFocusTrap();
+  const { classes, theme } = useStyles();
+  const isDesktop = useMediaQuery('(min-width: 750px)');
+  const focusTrapRef = useFocusTrap(isDesktop);
   const [answer, setAnswer] = useState('');
   const gameState = useGameStore(state => state.state);
 
