@@ -21,6 +21,7 @@ const GuessCountryWorld = {
     const playedQuestionsOfType = playedQuestions.filter(q => q.id === this.id);
 
     let randomCountry = countries[Math.floor(Math.random() * countries.length)];
+    // If there has already been a question of this type with this country, randomly choose another.
     while (playedQuestionsOfType.find(q => q.data.id === randomCountry.properties.ADM0_A3_GB)) {
       randomCountry = countries[Math.floor(Math.random() * countries.length)];
     };

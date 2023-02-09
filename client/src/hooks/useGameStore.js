@@ -73,8 +73,10 @@ const useGameStore = create((set, get) => ({
           ...initialState,
         });
   
+        // Handle disconnections differently depending on the reason
         switch (reason) {
-          case "io server disconnect": // Server was Manually Disconnected
+          case "io server disconnect": // Server was Manually Disconnected, 
+            // Therefore see if there was a reason given e.g. wrong nickname provided
             const disconnectReason = get().disconnectReason;
             if (disconnectReason) {
               showNotification({
@@ -116,7 +118,6 @@ const useGameStore = create((set, get) => ({
         players: gameData.players,
       });
     }).on("updatePlayers", (players) => {
-      console.log("New Player Joined");
       set({ players: players });
     }).on("startQuestion", (question, data, timeout) => {
       get().startQuestion(question, data, timeout);
@@ -176,10 +177,11 @@ const useGameStore = create((set, get) => ({
   leaveGame: () => {
     const socket = get().socket;
     if (socket && socket.connected) {
+      // Game is over and you are no longer required to stay connected to the websocket
       socket.disconnect();
     };
 
-    set({ ... initialState });
+    set({ ...initialState });
   },
   
   finishGame: (players) => {

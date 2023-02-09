@@ -25,6 +25,8 @@ export const generateGameCode = () => {
     code = getRandomString(6);
   };
 
+  generatedGameCodes[code] = true;
+
   return code;
 }
 

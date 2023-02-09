@@ -12,6 +12,7 @@ const FindStateUSA = {
     const playedQuestionsOfType = playedQuestions.filter(q => q.id === this.id);
 
     let randomState = states[Math.floor(Math.random() * states.length)];
+    // If there has already been a question of this type with this state, randomly choose another.
     while (playedQuestionsOfType.find(q => q.data.id === randomState.properties.postal)) {
       randomState = states[Math.floor(Math.random() * states.length)];
     };

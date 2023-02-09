@@ -21,8 +21,7 @@ const useStyles = createStyles((theme) => ({
     marginTop: '1%',
   },
   image: {
-    width: '25vh',
-    height: '25vh',
+    height: '40vh',
   },
 }));
 
@@ -47,7 +46,7 @@ export default function () {
     if (state === 'start') {
       setOptions({
         nickname: '',
-        numQuestions: 5,
+        numQuestions: 10,
         questionTypes: [...defaultQuestionTypes],
       });
     } else if (state === 'join') {
@@ -141,20 +140,20 @@ export default function () {
           <Grid>
             <Grid.Col span={12}>
               <TextInput
-                placeholder="Game Pin"
-                label="Game Pin"
-                value={options.joinCode}
-                onChange={e => changeOption('joinCode', e.currentTarget.value.toUpperCase())}
-                maxLength={6}
-              />
-            </Grid.Col>
-            <Grid.Col span={12}>
-              <TextInput
                 placeholder="Bob"
                 label="Nickname"
                 value={options.nickname}
                 onChange={e => changeOption('nickname', e.currentTarget.value)}
                 maxLength={20}
+              />
+            </Grid.Col>
+            <Grid.Col span={12}>
+              <TextInput
+                placeholder="Game Pin"
+                label="Game Pin"
+                value={options.joinCode}
+                onChange={e => changeOption('joinCode', e.currentTarget.value.toUpperCase())}
+                maxLength={6}
               />
             </Grid.Col>
             <Grid.Col span={6}>

@@ -18,6 +18,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
+// FIlter all the provinces to just those of the United States
 const StateTopos = ProvincesTopo?.objects?.ne_50m_admin_1_states_provinces?.geometries?.filter(geo => geo.properties.adm0_a3 === "USA") ?? [];
 
 export default function ({ highlightState, onSelect = null }) {
