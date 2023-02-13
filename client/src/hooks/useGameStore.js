@@ -55,6 +55,7 @@ const useGameStore = create((set, get) => ({
       ...data,
     };
 
+    // Establish the websocket connection with the server
     const socket = io(shConfig.socket, {
       query,
     });
@@ -108,7 +109,10 @@ const useGameStore = create((set, get) => ({
 
       console.log("Disconnected from Server");
       socket.disconnect();
-    }).on("disconnectReason", (reason) => {
+    }).on("disconnectReason", (reason) => { 
+      // If the server connection is diconnected manually and not due to network issues, 
+      // store the reason so that the correct error message can be displayed to the user
+      // if the nickname is invalid, the message will be stored here,
       set({ disconnectReason: reason });
     }).on("ready", (isHost, code, gameData) => {
       set({
@@ -125,7 +129,7 @@ const useGameStore = create((set, get) => ({
       get().finishQuestion(players, correctAnswer, results);
     }).on("finishGame", (players) => {
       get().finishGame(players);
-    });
+    }); // Add all the different event handlers for server events
   },
   start: () => {
     const s = get();
@@ -135,7 +139,9 @@ const useGameStore = create((set, get) => ({
   },
 
   startQuestion: (question, data, timeout) => {
+    // Clear any remaining progress timer
     get().clearProgressTimer();
+    // Show the loading overlay (purely to improve user experience)
     get().setLoading(true, "Loading Next Question");
 
     set({
@@ -144,6 +150,7 @@ const useGameStore = create((set, get) => ({
       state: 1,
     });
 
+    // Show the timer at the top of the screen with the remaining time left to answer the question
     get().setProgressTimer(timeout - 500);
     setTimeout(() => get().setLoading(false), 1500);
   },
@@ -152,6 +159,7 @@ const useGameStore = create((set, get) => ({
     const s = get();
 
     if (s.connected && s.ready && s.questionData) {
+      // Send the answer to the server
       s.socket.emit("giveAnswer", data);
       set({ answered: true });
       s.setLoading(true, "Was Your Answer Correct?");
@@ -173,8 +181,8 @@ const useGameStore = create((set, get) => ({
       get().setProgressTimer(6.5 * 1000);
     }, 500);
   },
-
-  leaveGame: () => {
+  // For leaving the game and resetting the UI state back to the main menu when the game is complete
+  leaveGame: () => { 
     const socket = get().socket;
     if (socket && socket.connected) {
       // Game is over and you are no longer required to stay connected to the websocket
