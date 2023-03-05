@@ -1,9 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createStyles, TextInput, Title, Button, Grid, Stack, NumberInput, MultiSelect } from '@mantine/core';
 import Earth from '../assets/earth.svg';
 
 import { useGameStore } from '../hooks';
-import { useEffect } from 'react';
 
 const useStyles = createStyles((theme) => ({
   container: {

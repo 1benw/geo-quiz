@@ -1,7 +1,7 @@
 import { createStyles, useMantineTheme } from '@mantine/core';
 import { useState, useEffect } from 'react';
 import { useGameStore } from '../../hooks';
-import { Marker, ComposableMap, Geographies, Geography, Graticule } from 'react-simple-maps';
+import { Marker, ComposableMap, Geographies, Geography } from 'react-simple-maps';
 
 import ZoomableGroup from '../CustomZoomableGroup';
 import WorldTopo from '../../../../topojson/ne_50m_admin_0_countries_shortened.json';
@@ -67,41 +67,31 @@ export default function ({ highlightCountry, onSelect = null }) {
         height={1000}
         style={{ height: '100%' }}
         projection="geoMercator"
-        projectionConfig={{
-          // rotate: [-100.0, 0, 0],
-          // scale: 400
-        }}
       >
         <ZoomableGroup center={center} maxZoom={100} minZoom={4} zoom={zoom}>
           <Geographies geography={WorldTopo}>
             {({ geographies }) =>
               geographies.map((geo) => {
                 if (geo.properties.ADM0_A3_GB != "ATA") { // Don't Render Antartica
+                  const style = {
+                    fill: (highlightCountry && geo.properties.ADM0_A3_GB === highlightCountry) ? theme.colors.blue[8] : "#9998A3",
+                    stroke: (highlightCountry && geo.properties.ADM0_A3_GB === highlightCountry) ? theme.colors.blue[8] : "#EAEAEC",
+                    outline: "none"
+                  };
+
                   return (
                     <Geography
                       key={geo.properties.NAME}
                       geography={geo}
                       strokeWidth={0.05}
                       style={{
-                        default: {
-                          fill: (highlightCountry && geo.properties.ADM0_A3_GB === highlightCountry) ? theme.colors.blue[8] : "#9998A3",
-                          stroke: (highlightCountry && geo.properties.ADM0_A3_GB === highlightCountry) ? theme.colors.blue[8] : "#EAEAEC",
-                          outline: "none"
-                        },
-                        hover: onSelect !== null ? {
+                        default: style,
+                        pressed: style,
+                        hover: onSelect !== null ? { // If waiting for a country to be clicked.
                           fill: theme.colors.blue[8],
                           stroke: theme.colors.blue[8],
                           outline: "none"
-                        } : {
-                          fill: (highlightCountry && geo.properties.ADM0_A3_GB === highlightCountry) ? theme.colors.blue[8] : "#9998A3",
-                          stroke: (highlightCountry && geo.properties.ADM0_A3_GB === highlightCountry) ? theme.colors.blue[8] : "#EAEAEC",
-                          outline: "none"
-                        },
-                        pressed: {
-                          fill: (highlightCountry && geo.properties.ADM0_A3_GB === highlightCountry) ? theme.colors.blue[8] : "#9998A3",
-                          stroke: (highlightCountry && geo.properties.ADM0_A3_GB === highlightCountry) ? theme.colors.blue[8] : "#EAEAEC",
-                          outline: "none"
-                        }
+                        } : style,
                       }}
                       onClick={
                         onSelect !== null ? () => {
@@ -121,4 +111,4 @@ export default function ({ highlightCountry, onSelect = null }) {
       </ComposableMap>
     </div>
   )
-}
+};

@@ -1,15 +1,9 @@
 const charSet = `ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`;
-
-// The `getRandomString` function is not written by me
-export const getRandomString = (length, charSetOverride) => {
-  let chars = charSetOverride;
-  if (!chars) {
-    chars = charSet;
-  }
+export const getRandomString = (length) => {
   let res = '';
 
   for (let i = 0; i < length; i++) {
-    res += chars[Math.floor(Math.random() * chars.length)];
+    res += charSet[Math.floor(Math.random() * charSet.length)];
   }
 
   return res;
@@ -25,7 +19,7 @@ export const generateGameCode = () => {
     code = getRandomString(6);
   };
 
-  generatedGameCodes[code] = true;
+  generatedGameCodes[code] = true; // Add to object so that the same code isn't generated for two simultaneous games
 
   return code;
 }
